@@ -9,8 +9,6 @@ using AgentFramework.Core.Models.Records;
 using System.Threading.Tasks;
 using AgentFramework.Core.Contracts;
 using Autofac;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Utils;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -48,23 +46,12 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             RefreshingCloudAgents = true;
 
             var context = await _agentContextProvider.GetContextAsync();
+            var agent = await _agentContextProvider.GetAgentAsync();
 
-            CloudAgentsGrouped = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-            if (CloudAgentsGrouped.Count > 0)
+            var messages = await _messageService.ConsumeAsync(context.Wallet);
+            foreach (var message in messages)
             {
-                try
-                {
-                    var messages = await _messageService.ConsumeAsync(context.Wallet);
-                    foreach (var message in messages)
-                    {
-                        var response = await _messageService.UnpackAsync(context.Wallet, message, null);
-                        response.Payload.ToString();
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
+                await agent.ProcessAsync(context, message);
             }
             
             RefreshingCloudAgents = false;

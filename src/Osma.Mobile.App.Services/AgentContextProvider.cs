@@ -18,6 +18,7 @@ namespace Osma.Mobile.App.Services
         private readonly IPoolService _poolService;
         private readonly IProvisioningService _provisioningService;
         private readonly IKeyValueStoreService _keyValueStoreService;
+        private readonly IAgent _agent;
 
         private const string AgentOptionsKey = "AgentOptions";
 
@@ -33,12 +34,14 @@ namespace Osma.Mobile.App.Services
         public AgentContextProvider(IWalletService walletService,
             IPoolService poolService,
             IProvisioningService provisioningService,
-            IKeyValueStoreService keyValueStoreService)
+            IKeyValueStoreService keyValueStoreService,
+            IAgent agent)
         {
             _poolService = poolService;
             _provisioningService = provisioningService;
             _walletService = walletService;
             _keyValueStoreService = keyValueStoreService;
+            _agent = agent;
 
             if (_keyValueStoreService.KeyExists(AgentOptionsKey))
                 _options = _keyValueStoreService.GetData<AgentOptions>(AgentOptionsKey);
@@ -91,7 +94,7 @@ namespace Osma.Mobile.App.Services
 
         public Task<IAgent> GetAgentAsync(params object[] args)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(_agent);
         }
     }
 }

@@ -3,7 +3,10 @@ using AgentFramework.AspNetCore;
 using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Handlers.Agents;
 using AgentFramework.Core.Runtime.Transport;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Autofac;
+using Osma.Mobile.App.Services.Interfaces;
 
 namespace Osma.Mobile.App.Services
 {
@@ -12,6 +15,12 @@ namespace Osma.Mobile.App.Services
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
+
+            builder.Populate(new ServiceCollection());
+
+            builder
+                .RegisterType<DefaultAgent>()
+                .As<IAgent>();
 
             builder
                 .RegisterType<HttpMessageDispatcher>()
