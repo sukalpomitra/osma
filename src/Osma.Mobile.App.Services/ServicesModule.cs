@@ -20,6 +20,10 @@ namespace Osma.Mobile.App.Services
             builder.Populate(new ServiceCollection());
 
             builder
+                .RegisterType<DefaultConnectionHandler>()
+                .As<IMessageHandler>();
+
+            builder
                 .RegisterType<DefaultAgent>()
                 .As<IAgent>();
 
@@ -30,11 +34,6 @@ namespace Osma.Mobile.App.Services
             builder
                 .RegisterType<HttpClientHandler>()
                 .As<HttpMessageHandler>();
-
-            builder
-                .RegisterType<DefaultConnectionHandler>()
-                .As<IMessageHandler>()
-                .InstancePerLifetimeScope();
 
             builder
                 .RegisterType<EventAggregator>()
