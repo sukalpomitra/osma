@@ -44,14 +44,23 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         public async Task RefreshCloudAgents()
         {
             RefreshingCloudAgents = true;
-
+            
             var context = await _agentContextProvider.GetContextAsync();
             var agent = await _agentContextProvider.GetAgentAsync();
 
-            var messages = await _messageService.ConsumeAsync(context.Wallet);
-            foreach (var message in messages)
+            CloudAgentsGrouped = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+
+            if (CloudAgentsGrouped.Count > 0)
             {
-                await agent.ProcessAsync(context, message);
+                var messages = await _messageService.ConsumeAsync(context.Wallet);
+                try
+                {
+                    foreach (var message in messages)
+                    {
+                        await agent.ProcessAsync(context, message);
+                    }
+                }
+                catch (Exception ex) { }
             }
             
             RefreshingCloudAgents = false;
