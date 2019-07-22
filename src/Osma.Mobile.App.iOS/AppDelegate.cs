@@ -24,6 +24,7 @@ namespace Osma.Mobile.App.iOS
         {
             Rg.Plugins.Popup.Popup.Init();
             Xamarin.Forms.Forms.Init();
+            XF.Material.iOS.Material.Init();
 
             // Initializing FFImageLoading
             CachedImageRenderer.Init();

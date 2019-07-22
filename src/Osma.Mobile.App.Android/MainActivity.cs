@@ -58,6 +58,9 @@ namespace Osma.Mobile.App.Droid
             builder.RegisterModule(new PlatformModule());
             var container = builder.Build();
 
+            Xamarin.Forms.Forms.Init(this, bundle);
+            XF.Material.Droid.Material.Init(this, bundle);
+
             LoadApplication(new App(container));
 #endif
         }

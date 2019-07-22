@@ -32,6 +32,7 @@ namespace Osma.Mobile.App
         public App(IContainer container)
         {
             InitializeComponent();
+            XF.Material.Forms.Material.Init(this);
 
             Colors.Init();
             _navigationService = container.Resolve<INavigationService>();
