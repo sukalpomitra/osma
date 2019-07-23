@@ -88,6 +88,9 @@
     <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core\AgentFramework.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\CreateInvitation\CreateInvitationPage.xaml.cs">
+      <DependentUpon>CreateInvitationPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Credentials\Credentials.xaml.cs">
       <DependentUpon>CredentialsPage.xaml</DependentUpon>
     </Compile>

@@ -9,6 +9,14 @@ using AgentFramework.Core.Models.Records;
 using System.Threading.Tasks;
 using AgentFramework.Core.Contracts;
 using Autofac;
+using ZXing.Net.Mobile.Forms;
+using AgentFramework.Core.Messages;
+using AgentFramework.Core.Utils;
+using AgentFramework.Core.Messages.Connections;
+using Osma.Mobile.App.ViewModels.Connections;
+using Osma.Mobile.App.Services;
+using Osma.Mobile.App.ViewModels.CreateInvitation;
+using Osma.Mobile.App.ViewModels.Account;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -60,7 +68,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
                         await agent.ProcessAsync(context, message);
                     }
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
             
             RefreshingCloudAgents = false;
@@ -71,11 +79,65 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
 
         }
 
+        public async Task ScanInvite()
+        {
+            var expectedFormat = ZXing.BarcodeFormat.QR_CODE;
+            var opts = new ZXing.Mobile.MobileBarcodeScanningOptions { PossibleFormats = new List<ZXing.BarcodeFormat> { expectedFormat } };
+
+            var scannerPage = new ZXingScannerPage(opts);
+            scannerPage.OnScanResult += (result) => {
+                scannerPage.IsScanning = false;
+
+                AgentMessage invitation;
+                var messageType = result.Text.Contains("c_a_r=") ? MessageTypes.CloudAgentRegistration : MessageTypes.ConnectionInvitation;
+
+                try
+                {
+                    switch (messageType)
+                    {
+                        case MessageTypes.CloudAgentRegistration:
+                            invitation = MessageUtils.DecodeMessageFromUrlFormat<CloudAgentRegistrationMessage>(result.Text);
+                            break;
+                        case MessageTypes.ConnectionInvitation:
+                            invitation = MessageUtils.DecodeMessageFromUrlFormat<ConnectionInvitationMessage>(result.Text);
+                            break;
+                        default:
+                            invitation = null;
+                            break;
+                    }
+                    if (invitation == null)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+                catch (Exception)
+                {
+                    DialogService.Alert("Invalid invitation!");
+                    Device.BeginInvokeOnMainThread(async () => await NavigationService.PopModalAsync());
+                    return;
+                }
+
+                Device.BeginInvokeOnMainThread(async () =>
+                {
+                    await NavigationService.PopModalAsync();
+                    await NavigationService.NavigateToAsync<AcceptInviteViewModel>(invitation, NavigationType.Modal);
+                });
+            };
+
+            await NavigationService.NavigateToAsync((Page)scannerPage, NavigationType.Modal);
+        }
+
         #region Bindable Command
         public ICommand RefreshCommand => new Command(async () => await RefreshCloudAgents());
 
         public ICommand DeleteCommand => new Command(async () => await DeleteCloudAgent());
-        
+
+        public ICommand ScanInviteCommand => new Command(async () => await ScanInvite());
+
+        public ICommand CreateInvitationCommand => new Command(async () => await NavigationService.NavigateToAsync<CreateInvitationViewModel>());
+
+        public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
+
         #endregion
 
         #region Bindable Properties

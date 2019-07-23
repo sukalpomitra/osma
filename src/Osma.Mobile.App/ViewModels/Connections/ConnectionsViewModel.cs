@@ -15,6 +15,7 @@ using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.ViewModels.Account;
+using Osma.Mobile.App.ViewModels.CreateInvitation;
 using ReactiveUI;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
@@ -130,6 +131,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
         public ICommand RefreshCommand => new Command(async () => await RefreshConnections());
 
         public ICommand ScanInviteCommand => new Command(async () => await ScanInvite());
+
+        public ICommand CreateInvitationCommand => new Command(async () => await NavigationService.NavigateToAsync<CreateInvitationViewModel>());
 
         public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
 

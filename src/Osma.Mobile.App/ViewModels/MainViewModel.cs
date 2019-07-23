@@ -4,6 +4,7 @@ using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.ViewModels.Account;
 using Osma.Mobile.App.ViewModels.CloudAgents;
 using Osma.Mobile.App.ViewModels.Connections;
+using Osma.Mobile.App.ViewModels.CreateInvitation;
 using Osma.Mobile.App.ViewModels.Credentials;
 using ReactiveUI;
 
@@ -17,7 +18,8 @@ namespace Osma.Mobile.App.ViewModels
             ConnectionsViewModel connectionsViewModel,
             CredentialsViewModel credentialsViewModel,
             AccountViewModel accountViewModel,
-            CloudAgentsViewModel cloudAgentsViewModel
+            CloudAgentsViewModel cloudAgentsViewModel,
+            CreateInvitationViewModel createInvitationViewModel
         ) : base(
                 nameof(MainViewModel),
                 userDialogs,
@@ -28,6 +30,7 @@ namespace Osma.Mobile.App.ViewModels
             Credentials = credentialsViewModel;
             Account = accountViewModel;
             CloudAgents = cloudAgentsViewModel;
+            CreateInvitation = createInvitationViewModel;
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -36,6 +39,7 @@ namespace Osma.Mobile.App.ViewModels
             await Credentials.InitializeAsync(null);
             await Account.InitializeAsync(null);
             await CloudAgents.InitializeAsync(null);
+            await CreateInvitation.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
         }
 
@@ -66,6 +70,13 @@ namespace Osma.Mobile.App.ViewModels
         {
             get => _cloudAgents;
             set => this.RaiseAndSetIfChanged(ref _cloudAgents, value);
+        }
+
+        private CreateInvitationViewModel _createInvitation;
+        public CreateInvitationViewModel CreateInvitation
+        {
+            get => _createInvitation;
+            set => this.RaiseAndSetIfChanged(ref _createInvitation, value);
         }
 
         #endregion
