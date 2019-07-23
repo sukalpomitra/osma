@@ -41,12 +41,12 @@ namespace Osma.Mobile.App.ViewModels.Credentials
            )
         {
             _credentialService = credentialService;
-            _agentContextProvider = agentContextProvider;
+            _agentContextProvider = agentContextProvider;         
             _connectionService = defaultConnectionService;
             _scope = scope;
 
             this.WhenAnyValue(x => x.SearchTerm)
-                .Throttle(TimeSpan.FromMilliseconds(200))
+                .Throttle(TimeSpan.FromMilliseconds(200))   
                 .InvokeCommand(RefreshCommand);
         }
 
