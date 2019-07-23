@@ -15,6 +15,7 @@ using Osma.Mobile.App.Views.Account;
 using Osma.Mobile.App.Views.Connections;
 using Osma.Mobile.App.Views.CreateInvitation;
 using Osma.Mobile.App.Views.Credentials;
+using Osma.Mobile.App.Views.UserRegistration;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
@@ -46,7 +47,7 @@ namespace Osma.Mobile.App
         Task InitializeTask;
         private async Task Initialize()
         {
-            //Pages
+            //Pages // do we need this? - Amul
             _navigationService.AddPageViewModelBinding<MainViewModel, MainPage>();
             _navigationService.AddPageViewModelBinding<ConnectionsViewModel, ConnectionsPage>();
             _navigationService.AddPageViewModelBinding<ConnectionViewModel, ConnectionPage>();
@@ -56,6 +57,9 @@ namespace Osma.Mobile.App
             _navigationService.AddPageViewModelBinding<CredentialViewModel, CredentialPage>();
             _navigationService.AddPageViewModelBinding<AccountViewModel, AccountPage>();
             _navigationService.AddPageViewModelBinding<CreateInvitationViewModel, CreateInvitationPage>();
+            _navigationService.AddPageViewModelBinding<FullNameViewModel, FullNamePage>();
+            _navigationService.AddPageViewModelBinding<EmailAddressViewModel, EmailAddressPage>();
+            _navigationService.AddPageViewModelBinding<PhoneNumberViewModel, PhoneNumberPage>();
 
             if (_contextProvider.AgentExists())
             {

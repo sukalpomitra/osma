@@ -4,6 +4,7 @@ using Acr.UserDialogs;
 using AgentFramework.Core.Models.Wallets;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
+using Osma.Mobile.App.Views.UserRegistration;
 using Xamarin.Forms;
 
 namespace Osma.Mobile.App.ViewModels
@@ -11,6 +12,7 @@ namespace Osma.Mobile.App.ViewModels
     public class RegisterViewModel : ABaseViewModel
     {
         private readonly ICustomAgentContextProvider _agentContextProvider;
+        private readonly INavigationService _navigationService;
 
         public RegisterViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
@@ -19,6 +21,7 @@ namespace Osma.Mobile.App.ViewModels
                                  userDialogs, 
                                  navigationService)
         {
+            _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
         }
 
@@ -54,9 +57,10 @@ namespace Osma.Mobile.App.ViewModels
             {
                 dialog?.Hide();
                 dialog?.Dispose();
-                UserDialogs.Instance.Alert("Failed to create wallet!");
+                UserDialogs.Instance.Alert("Failed to create wallet!")  ;
             }
         });
+
         #endregion
     }
 }
