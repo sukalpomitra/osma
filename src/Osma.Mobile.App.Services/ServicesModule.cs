@@ -1,8 +1,13 @@
 ﻿using System.Net.Http;
+using AgentFramework.AspNetCore;
 using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Handlers.Agents;
+using AgentFramework.Core.Handlers.Internal;
 using AgentFramework.Core.Runtime.Transport;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Autofac;
+using AgentFramework.Core.Handlers;
 
 namespace Osma.Mobile.App.Services
 {
@@ -11,6 +16,16 @@ namespace Osma.Mobile.App.Services
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
+
+            builder.Populate(new ServiceCollection());
+
+            builder
+                .RegisterType<DefaultConnectionHandler>()
+                .As<IMessageHandler>();
+
+            builder
+                .RegisterType<DefaultAgent>()
+                .As<IAgent>();
 
             builder
                 .RegisterType<HttpMessageDispatcher>()
@@ -47,6 +62,11 @@ namespace Osma.Mobile.App.Services
 
             builder
                 .RegisterType<DefaultConnectionService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder
+                .RegisterType<DefaultCloudRegistrationService>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
 

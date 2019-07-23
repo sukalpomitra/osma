@@ -2,6 +2,7 @@
 using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.ViewModels.Account;
+using Osma.Mobile.App.ViewModels.CloudAgents;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.ViewModels.Credentials;
 using ReactiveUI;
@@ -15,7 +16,8 @@ namespace Osma.Mobile.App.ViewModels
             INavigationService navigationService,
             ConnectionsViewModel connectionsViewModel,
             CredentialsViewModel credentialsViewModel,
-            AccountViewModel accountViewModel
+            AccountViewModel accountViewModel,
+            CloudAgentsViewModel cloudAgentsViewModel
         ) : base(
                 nameof(MainViewModel),
                 userDialogs,
@@ -25,6 +27,7 @@ namespace Osma.Mobile.App.ViewModels
             Connections = connectionsViewModel;
             Credentials = credentialsViewModel;
             Account = accountViewModel;
+            CloudAgents = cloudAgentsViewModel;
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -32,6 +35,7 @@ namespace Osma.Mobile.App.ViewModels
             await Connections.InitializeAsync(null);
             await Credentials.InitializeAsync(null);
             await Account.InitializeAsync(null);
+            await CloudAgents.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
         }
 
@@ -56,6 +60,14 @@ namespace Osma.Mobile.App.ViewModels
             get => _account;
             set => this.RaiseAndSetIfChanged(ref _account, value);
         }
+
+        private CloudAgentsViewModel _cloudAgents;
+        public CloudAgentsViewModel CloudAgents
+        {
+            get => _cloudAgents;
+            set => this.RaiseAndSetIfChanged(ref _cloudAgents, value);
+        }
+
         #endregion
     }
 }

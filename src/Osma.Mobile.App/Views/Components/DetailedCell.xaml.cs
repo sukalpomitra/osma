@@ -97,6 +97,27 @@ namespace Osma.Mobile.App.Views.Components
             });
         }
 
+        public static readonly BindableProperty HasDeleteProperty =
+            BindableProperty.Create("HasDelete", typeof(bool), typeof(DetailedCell), false,
+                propertyChanged: HasDeletePropertyChanged);
+
+        public bool HasDelete
+        {
+            get { return (bool)GetValue(HasDeleteProperty); }
+            set { SetValue(HasDeleteProperty, value); }
+        }
+
+        static void HasDeletePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            DetailedCell cell = (DetailedCell)bindable;
+            bool isNew = (bool)newValue;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                cell.DeleteLabelContainer.IsVisible = isNew;
+                cell.DeleteButton.IsVisible = isNew;
+            });
+        }
+
         public DetailedCell()
         {
             InitializeComponent();

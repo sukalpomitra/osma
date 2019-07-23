@@ -19,9 +19,14 @@
     <NoStdLib>false</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AgentFramework.Core" Version="4.0.0-preview.662" />
-    <PackageReference Include="AgentFramework.Core.Handlers" Version="4.0.0-preview.662" />
-    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Autofac" Version="4.9.2" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core\AgentFramework.Core.csproj" />
+    <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core.Handlers\AgentFramework.Core.Handlers.csproj" />
+  </ItemGroup>
 </Project>

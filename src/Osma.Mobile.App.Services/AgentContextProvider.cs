@@ -2,8 +2,10 @@
 using System.IO;
 using System.Threading.Tasks;
 using AgentFramework.Core.Contracts;
+using AgentFramework.Core.Handlers;
 using AgentFramework.Core.Handlers.Agents;
 using AgentFramework.Core.Models.Wallets;
+using AgentFramework.AspNetCore;
 using Hyperledger.Indy.WalletApi;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
@@ -16,6 +18,7 @@ namespace Osma.Mobile.App.Services
         private readonly IPoolService _poolService;
         private readonly IProvisioningService _provisioningService;
         private readonly IKeyValueStoreService _keyValueStoreService;
+        private readonly IAgent _agent;
 
         private const string AgentOptionsKey = "AgentOptions";
 
@@ -31,12 +34,14 @@ namespace Osma.Mobile.App.Services
         public AgentContextProvider(IWalletService walletService,
             IPoolService poolService,
             IProvisioningService provisioningService,
-            IKeyValueStoreService keyValueStoreService)
+            IKeyValueStoreService keyValueStoreService,
+            IAgent agent)
         {
             _poolService = poolService;
             _provisioningService = provisioningService;
             _walletService = walletService;
             _keyValueStoreService = keyValueStoreService;
+            _agent = agent;
 
             if (_keyValueStoreService.KeyExists(AgentOptionsKey))
                 _options = _keyValueStoreService.GetData<AgentOptions>(AgentOptionsKey);
@@ -53,7 +58,8 @@ namespace Osma.Mobile.App.Services
                 WalletConfiguration = options.WalletOptions.WalletConfiguration,
                 WalletCredentials = options.WalletOptions.WalletCredentials,
                 AgentSeed = options.Seed,
-                EndpointUri = options.EndpointUri != null ? new Uri($"{options.EndpointUri}") : null
+                EndpointUri = options.EndpointUri != null ? new Uri($"{options.EndpointUri}") : null,
+                OwnerName = "PALOUSER" + (new Random()).Next(0, 100)
             });
 
             await _keyValueStoreService.SetDataAsync(AgentOptionsKey, options);
@@ -89,7 +95,7 @@ namespace Osma.Mobile.App.Services
         //TODO implement the getAgentSync method
         public Task<IAgent> GetAgentAsync(params object[] args)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(_agent);
         }
     }
 }

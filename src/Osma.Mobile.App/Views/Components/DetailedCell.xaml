@@ -74,6 +74,28 @@
                     Text="New"
                 />
             </Frame>
+
+            <Frame
+                IsVisible="false"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="2"
+                x:Name="DeleteLabelContainer"
+                BackgroundColor="Black"
+                Padding="6, 2"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                HasShadow="false"
+            >
+                <Button
+                    IsVisible="false"
+                    x:Name="DeleteButton"
+                    VerticalOptions="Center"
+                    FontSize="Medium"
+                    TextColor="White"
+                    Text="Delete"
+                />
+            </Frame>
         </Grid>
     </ViewCell.View>
 </ViewCell>
