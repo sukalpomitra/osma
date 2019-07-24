@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using AgentFramework.Core.Models.Wallets;
+using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
+using Osma.Mobile.App.Views.Legal;
 using Osma.Mobile.App.Views.UserRegistration;
 using Xamarin.Forms;
 
@@ -61,6 +64,7 @@ namespace Osma.Mobile.App.ViewModels
             }
         });
 
+        public ICommand OpenFullNamePageCommand => new Command(async () => await _navigationService.NavigateToAsync<FullNameViewModel>());
         #endregion
     }
 }

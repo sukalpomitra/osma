@@ -1,23 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:views="clr-namespace:Osma.Mobile.App.Views.UserRegistration"
              mc:Ignorable="d"
              x:Class="Osma.Mobile.App.Views.UserRegistration.CreateWalletPage">
-  <ContentView.Content>
-      <StackLayout>
-            <views:FullNamePage></views:FullNamePage>
-          
-            <!--<Label
-                FontSize="20"
-                HorizontalOptions="Center"
-                Text="Welcome to Osma"></Label>
-            <Button 
-                VerticalOptions="CenterAndExpand"
-                Text="Create Wallet"
-                Command="{Binding CreateWalletCommand}"/>-->
-        </StackLayout>
-  </ContentView.Content>
-</ContentView>
+    <StackLayout>
+        <Label Text="Hello Xamarin.Forms!" />
+        <Label Text="Welcome to Create wallet page!" />
+        <Button Text="Create wallet"></Button>
+    </StackLayout>
+</ContentPage>

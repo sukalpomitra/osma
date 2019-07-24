@@ -14,6 +14,10 @@
                 VerticalOptions="CenterAndExpand"
                 Text="Create Wallet"
                 Command="{Binding CreateWalletCommand}"/>
+            <Button 
+                VerticalOptions="CenterAndExpand"
+                Text="Open fullName entry"
+                Command="{Binding OpenFullNamePageCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

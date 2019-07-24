@@ -1,5 +1,4 @@
-﻿
-using Acr.UserDialogs;
+﻿using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Views.UserRegistration;
 using System.Windows.Input;

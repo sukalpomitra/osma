@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="Osma.Mobile.App.Views.UserRegistration.PhoneNumberPage">
-  <ContentView.Content>
       <StackLayout>
           <Label Text="Hello Xamarin.Forms!" />
-          <Label Text="And now time for the email address!" />
-            <Button Text="oKay u are done"></Button>
-      </StackLayout>
-  </ContentView.Content>
-</ContentView>
+          <Label Text="And now time for the phone number!" />
+        <Button 
+                VerticalOptions="CenterAndExpand"
+                Text="Next"
+                Command="{Binding OpenCreateWalletPageCommand}"/>
+    </StackLayout>
+</ContentPage>

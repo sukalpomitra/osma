@@ -17,12 +17,17 @@ namespace Osma.Mobile.App.ViewModels
         public PhoneNumberViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
                                  ICustomAgentContextProvider agentContextProvider) : base(
-                                 nameof(RegisterViewModel), 
+                                 nameof(PhoneNumberViewModel), 
                                  userDialogs, 
                                  navigationService)
         {
             _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
         }
+
+        #region Bindable Command
+        public ICommand OpenCreateWalletPageCommand => new Command(async () => await _navigationService.NavigateToAsync<CreateWalletViewModel>());
+
+        #endregion
     }
 }

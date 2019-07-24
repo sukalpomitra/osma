@@ -17,7 +17,7 @@ namespace Osma.Mobile.App.ViewModels
         public EmailAddressViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
                                  ICustomAgentContextProvider agentContextProvider) : base(
-                                 nameof(RegisterViewModel), 
+                                 nameof(EmailAddressViewModel), 
                                  userDialogs, 
                                  navigationService)
         {
@@ -25,5 +25,9 @@ namespace Osma.Mobile.App.ViewModels
             _agentContextProvider = agentContextProvider;
         }
 
+        #region Bindable Command
+        public ICommand OpenPhoneNumberPageCommand => new Command(async () => await _navigationService.NavigateToAsync<PhoneNumberViewModel>());
+
+        #endregion
     }
 }
