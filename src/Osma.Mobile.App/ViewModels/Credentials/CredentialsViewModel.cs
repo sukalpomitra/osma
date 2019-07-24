@@ -12,11 +12,8 @@ using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Utilities;
-using Osma.Mobile.App.ViewModels.Account;
 using ReactiveUI;
 using Xamarin.Forms;
-using ZXing.Net.Mobile.Forms;
-using AgentFramework.Core.Extensions;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
@@ -25,14 +22,12 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private readonly ICredentialService _credentialService;
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ILifetimeScope _scope;
-        private readonly IConnectionService _connectionService;
 
         public CredentialsViewModel(
             IUserDialogs userDialogs,
             INavigationService navigationService,
             ICredentialService credentialService,
             ICustomAgentContextProvider agentContextProvider,
-            IConnectionService defaultConnectionService,
             ILifetimeScope scope
             ) : base(
                 "Credentials",
@@ -40,13 +35,13 @@ namespace Osma.Mobile.App.ViewModels.Credentials
                 navigationService
            )
         {
+
             _credentialService = credentialService;
-            _agentContextProvider = agentContextProvider;         
-            _connectionService = defaultConnectionService;
+            _agentContextProvider = agentContextProvider;
             _scope = scope;
 
             this.WhenAnyValue(x => x.SearchTerm)
-                .Throttle(TimeSpan.FromMilliseconds(200))   
+                .Throttle(TimeSpan.FromMilliseconds(200))
                 .InvokeCommand(RefreshCommand);
         }
 
@@ -128,7 +123,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             .OrderBy(credentialViewModel => credentialViewModel.CredentialName)
             .GroupBy(credentialViewModel =>
             {
-                if(string.IsNullOrWhiteSpace(credentialViewModel.CredentialName))
+                if (string.IsNullOrWhiteSpace(credentialViewModel.CredentialName))
                 {
                     return "*";
                 }
@@ -144,43 +139,9 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
         }
 
-        private async Task CreateInvitation()
-        {
-            DialogService.Alert("Invitation being created");
 
-            var context = await _agentContextProvider.GetContextAsync();
-            var (invitation, _)= await _connectionService.CreateInvitationAsync(context);
-            
-            string barcodeValue = invitation.ServiceEndpoint + "?c_i=" + (invitation.ToJson().ToBase64());
 
-            //QRCodeGenerator(barcodeValue); //set a view attribute, to show on the screen. 
-
-            QrCodeValue = barcodeValue;
-        }
-
-        private ZXingBarcodeImageView QRCodeGenerator(String barcodeValue)
-        {
-            var barcode = new ZXingBarcodeImageView
-            {
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                AutomationId = "zxingBarcodeImageView",
-            };
-
-            barcode.BarcodeFormat = ZXing.BarcodeFormat.QR_CODE;
-            barcode.BarcodeOptions.Width = 300;
-            barcode.BarcodeOptions.Height = 300;
-            barcode.BarcodeOptions.Margin = 10;
-            barcode.BarcodeValue = barcodeValue;
-
-            return barcode;
-
-        }
-
-    #region Bindable Command
-
-    public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
-
+        #region Bindable Command
         public ICommand SelectCredentialCommand => new Command<CredentialViewModel>(async (credentials) =>
         {
             if (credentials != null)
@@ -188,8 +149,6 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         });
 
         public ICommand RefreshCommand => new Command(async () => await RefreshCredentials());
-
-        public ICommand CreateInvitationCommand => new Command(() => CreateInvitation());
 
         #endregion
 
@@ -220,14 +179,6 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         {
             get => _searchTerm;
             set => this.RaiseAndSetIfChanged(ref _searchTerm, value);
-        }
-
-        private string _qrCodeValue;
-
-        public string QrCodeValue
-        {
-            get => _qrCodeValue;
-            set => this.RaiseAndSetIfChanged(ref _qrCodeValue, value);
         }
 
         private IEnumerable<Grouping<string, CredentialViewModel>> _credentialsGrouped;
