@@ -88,6 +88,21 @@
     <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core\AgentFramework.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\CloudAgents\ActionItemView.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CloudAgents\CloudAgentPage.xaml.cs">
+      <DependentUpon>CloudAgentPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CloudAgents\ErrorItemView.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CloudAgents\MultiActionItemView.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CloudAgents\StatusItemView.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
     <Compile Update="Views\CreateInvitation\CreateInvitationPage.xaml.cs">
       <DependentUpon>CreateInvitationPage.xaml</DependentUpon>
     </Compile>

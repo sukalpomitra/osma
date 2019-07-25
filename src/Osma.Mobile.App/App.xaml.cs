@@ -7,11 +7,13 @@ using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Utilities;
 using Osma.Mobile.App.ViewModels;
 using Osma.Mobile.App.ViewModels.Account;
+using Osma.Mobile.App.ViewModels.CloudAgents;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.ViewModels.CreateInvitation;
 using Osma.Mobile.App.ViewModels.Credentials;
 using Osma.Mobile.App.Views;
 using Osma.Mobile.App.Views.Account;
+using Osma.Mobile.App.Views.CloudAgents;
 using Osma.Mobile.App.Views.Connections;
 using Osma.Mobile.App.Views.CreateInvitation;
 using Osma.Mobile.App.Views.Credentials;
@@ -60,6 +62,8 @@ namespace Osma.Mobile.App
             _navigationService.AddPageViewModelBinding<FullNameViewModel, FullNamePage>();
             _navigationService.AddPageViewModelBinding<EmailAddressViewModel, EmailAddressPage>();
             _navigationService.AddPageViewModelBinding<PhoneNumberViewModel, PhoneNumberPage>();
+            _navigationService.AddPageViewModelBinding<CloudAgentsViewModel, CloudAgentsPage>();
+            _navigationService.AddPageViewModelBinding<CloudAgentViewModel, CloudAgentPage>();
 
             if (_contextProvider.AgentExists())
             {

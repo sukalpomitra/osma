@@ -13,10 +13,10 @@ using ZXing.Net.Mobile.Forms;
 using AgentFramework.Core.Messages;
 using AgentFramework.Core.Utils;
 using AgentFramework.Core.Messages.Connections;
-using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.ViewModels.CreateInvitation;
 using Osma.Mobile.App.ViewModels.Account;
+using Osma.Mobile.App.ViewModels.Connections;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -84,11 +84,6 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             RefreshingCloudAgents = false;
         }
 
-        public async Task DeleteCloudAgent()
-        {
-
-        }
-
         public async Task ScanInvite()
         {
             var expectedFormat = ZXing.BarcodeFormat.QR_CODE;
@@ -137,10 +132,10 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             await NavigationService.NavigateToAsync((Page)scannerPage, NavigationType.Modal);
         }
 
+        public async Task SelectCloudAgent(CloudAgentViewModel cloudAgent) => await NavigationService.NavigateToAsync(cloudAgent);
+
         #region Bindable Command
         public ICommand RefreshCommand => new Command(async () => await RefreshCloudAgents());
-
-        public ICommand DeleteCommand => new Command(async () => await DeleteCloudAgent());
 
         public ICommand ScanInviteCommand => new Command(async () => await ScanInvite());
 
@@ -148,6 +143,11 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
 
         public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
 
+        public ICommand SelectCloudAgentCommand => new Command<CloudAgentViewModel>(async (cloudAgent) =>
+        {
+            if (cloudAgent != null)
+                await SelectCloudAgent(cloudAgent);
+        });
         #endregion
 
         #region Bindable Properties
@@ -165,6 +165,12 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             set => this.RaiseAndSetIfChanged(ref _refreshingCloudAgents, value);
         }
 
+        private bool _hasCloudAgents;
+        public bool HasCloudAgents
+        {
+            get => _hasCloudAgents;
+            set => this.RaiseAndSetIfChanged(ref _hasCloudAgents, value);
+        }
         #endregion
     }
 }
