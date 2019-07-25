@@ -46,6 +46,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshConnections();
+            await BackgroundRefresh();
 
             _eventAggregator.GetEventByType<ApplicationEvent>()
                             .Where(_ => _.Type == ApplicationEventType.ConnectionsUpdated)
@@ -54,7 +55,15 @@ namespace Osma.Mobile.App.ViewModels.Connections
             await base.InitializeAsync(navigationData);
         }
 
-
+        public async Task BackgroundRefresh()
+        {
+            for (long i = 0; i <= long.MaxValue; i++)
+            {
+                await Task.Delay(5000);
+                await RefreshConnections();
+            }
+        }
+        
         public async Task RefreshConnections()
         {
             RefreshingConnections = true;

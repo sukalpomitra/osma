@@ -46,7 +46,17 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshCloudAgents();
+            await BackgroundRefresh();
             await base.InitializeAsync(navigationData);
+        }
+
+        public async Task BackgroundRefresh()
+        {
+            for (long i = 0; i <= long.MaxValue; i++)
+            {
+                await Task.Delay(5000);
+                await RefreshCloudAgents();
+            }
         }
 
         public async Task RefreshCloudAgents()
