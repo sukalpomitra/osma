@@ -101,7 +101,9 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
                         await agent.ProcessAsync(context, message);
                     }
                 }
-                catch (Exception ex) { DialogService.Alert(ex.Message); }
+                catch (Exception ex) {
+                    //DialogService.Alert(ex.Message);
+                }
             }
             
             RefreshingCloudAgents = false;
