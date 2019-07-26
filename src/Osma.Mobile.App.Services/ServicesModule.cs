@@ -21,10 +21,12 @@ namespace Osma.Mobile.App.Services
 
             builder
                 .RegisterType<DefaultConnectionHandler>()
+                .Keyed<IMessageHandler>("connection")
                 .As<IMessageHandler>();
 
             builder
                 .RegisterType<DefaultCredentialHandler>()
+                .Keyed<IMessageHandler>("credential")
                 .As<IMessageHandler>();
 
             builder
