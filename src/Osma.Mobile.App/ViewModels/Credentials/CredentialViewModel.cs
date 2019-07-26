@@ -27,44 +27,44 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             _credential = credential;
             _isNew = IsCredentialNew(_credential);
 
-            #if DEBUG
-            _credentialName = "Credential Name";
-            _credentialImageUrl = "http://placekitten.com/g/200/200";
-            _credentialSubtitle = "10/22/2017";
-            _credentialType = "Bank Statement";
-            _qRImageUrl = "http://placekitten.com/g/100/100";
+            //#if DEBUG
+            //_credentialName = "Credential Name";
+            //_credentialImageUrl = "http://placekitten.com/g/200/200";
+            //_credentialSubtitle = "10/22/2017";
+            //_credentialType = "Bank Statement";
+            //_qRImageUrl = "http://placekitten.com/g/100/100";
 
-            var attributes = new List<CredentialAttribute>( new CredentialAttribute[] {
-                new CredentialAttribute
-                {
-                    Type="Text",
-                    Name="First Name",
-                    Value="Jamie"
-                },
-                new CredentialAttribute
-                {
-                    Type="Text",
-                    Name="Last Name",
-                    Value="Doe"
-                },
-                new CredentialAttribute
-                {
-                    Type = "Text",
-                    Name = "Country of Residence",
-                    Value = "New Zealand"
-                },
-                new CredentialAttribute
-                {
-                    Type="File",
-                    Name="Statement",
-                    Value="Statement.pdf",
-                    FileExt="PDF",
-                    Date="05 Aug 2018"
-                }
-            });
-            _attributes = attributes
-                .OrderByDescending(o=>o.Type).OrderBy(o=>o.Date);
-            #endif
+            //var attributes = new List<CredentialAttribute>( new CredentialAttribute[] {
+            //    new CredentialAttribute
+            //    {
+            //        Type="Text",
+            //        Name="First Name",
+            //        Value="Jamie"
+            //    },
+            //    new CredentialAttribute
+            //    {
+            //        Type="Text",
+            //        Name="Last Name",
+            //        Value="Doe"
+            //    },
+            //    new CredentialAttribute
+            //    {
+            //        Type = "Text",
+            //        Name = "Country of Residence",
+            //        Value = "New Zealand"
+            //    },
+            //    new CredentialAttribute
+            //    {
+            //        Type="File",
+            //        Name="Statement",
+            //        Value="Statement.pdf",
+            //        FileExt="PDF",
+            //        Date="05 Aug 2018"
+            //    }
+            //});
+            //_attributes = attributes
+            //    .OrderByDescending(o=>o.Type).OrderBy(o=>o.Date);
+            //#endif
         }
 
 
