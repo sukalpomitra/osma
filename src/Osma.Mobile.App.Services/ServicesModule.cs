@@ -24,6 +24,10 @@ namespace Osma.Mobile.App.Services
                 .As<IMessageHandler>();
 
             builder
+                .RegisterType<DefaultCredentialHandler>()
+                .As<IMessageHandler>();
+
+            builder
                 .RegisterType<DefaultAgent>()
                 .As<IAgent>();
 
