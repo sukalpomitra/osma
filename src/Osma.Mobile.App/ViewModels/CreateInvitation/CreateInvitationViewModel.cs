@@ -24,7 +24,7 @@ namespace Osma.Mobile.App.ViewModels.CreateInvitation
             ICustomAgentContextProvider agentContextProvider,
             IConnectionService defaultConnectionService
             ) : base(
-                "CreateInvitation",
+                nameof(CreateInvitationViewModel),
                 userDialogs,
                 navigationService
            )

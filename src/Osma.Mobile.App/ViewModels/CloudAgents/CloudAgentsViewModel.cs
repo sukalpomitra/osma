@@ -5,7 +5,6 @@ using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using Xamarin.Forms;
 using ReactiveUI;
-using AgentFramework.Core.Models.Records;
 using System.Threading.Tasks;
 using AgentFramework.Core.Contracts;
 using Autofac;
@@ -17,6 +16,10 @@ using Osma.Mobile.App.Services;
 using Osma.Mobile.App.ViewModels.CreateInvitation;
 using Osma.Mobile.App.ViewModels.Account;
 using Osma.Mobile.App.ViewModels.Connections;
+using Osma.Mobile.App.Extensions;
+using System.Linq;
+using Osma.Mobile.App.Events;
+using System.Reactive.Linq;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -24,34 +27,44 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
     {
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ICloudAgentRegistrationService _registrationService;
+        private readonly IEventAggregator _eventAggregator;
         private readonly ILifetimeScope _scope;
         private readonly IMessageService _messageService;
+        private bool isRefreshStarted = false;
 
         public CloudAgentsViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
                                  ICustomAgentContextProvider agentContextProvider,
                                  ICloudAgentRegistrationService registrationService,
                                  IMessageService messageService,
+                                 IEventAggregator eventAggregator,
                                  ILifetimeScope scope) : base(
-                                 nameof(CloudAgentsViewModel), 
+                                 nameof(CloudAgentsViewModel),
                                  userDialogs, 
                                  navigationService)
         {
             _agentContextProvider = agentContextProvider;
             _registrationService = registrationService;
             _scope = scope;
+            _eventAggregator = eventAggregator;
             _messageService = messageService;
         }
 
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshCloudAgents();
-            await BackgroundRefresh();
+            if (!isRefreshStarted) _ = BackgroundRefreshCloudAgents();
+
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                            .Where(_ => _.Type == ApplicationEventType.CloudAgentsUpdated)
+                            .Subscribe(async _ => await RefreshCloudAgents());
+
             await base.InitializeAsync(navigationData);
         }
 
-        public async Task BackgroundRefresh()
+        public async Task BackgroundRefreshCloudAgents()
         {
+            isRefreshStarted = true;
             for (long i = 0; i <= long.MaxValue; i++)
             {
                 await Task.Delay(5000);
@@ -65,20 +78,30 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             
             var context = await _agentContextProvider.GetContextAsync();
             var agent = await _agentContextProvider.GetAgentAsync();
+            var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
 
-            CloudAgentsGrouped = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+            IList<CloudAgentViewModel> cloudAgentVms = new List<CloudAgentViewModel>();
+            foreach (var record in records)
+            {
+                var cloudAgent = _scope.Resolve<CloudAgentViewModel>(new NamedParameter("record", record));
+                cloudAgentVms.Add(cloudAgent);
+            }
+
+            CloudAgentsGrouped.Clear();
+            CloudAgentsGrouped.InsertRange(cloudAgentVms);
+            HasCloudAgents = cloudAgentVms.Any();
 
             if (CloudAgentsGrouped.Count > 0)
             {
-                var messages = await _messageService.ConsumeAsync(context.Wallet);
                 try
                 {
+                    var messages = await _messageService.ConsumeAsync(context.Wallet);
                     foreach (var message in messages)
                     {
                         await agent.ProcessAsync(context, message);
                     }
                 }
-                catch (Exception) { }
+                catch (Exception ex) { DialogService.Alert(ex.Message); }
             }
             
             RefreshingCloudAgents = false;
@@ -151,11 +174,11 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         #endregion
 
         #region Bindable Properties
-        private List<CloudAgentRegistrationRecord> _cloudAgentsGrouped;
-        public List<CloudAgentRegistrationRecord> CloudAgentsGrouped
+        private RangeEnabledObservableCollection<CloudAgentViewModel> _cloudAgents = new RangeEnabledObservableCollection<CloudAgentViewModel>();
+        public RangeEnabledObservableCollection<CloudAgentViewModel> CloudAgentsGrouped
         {
-            get => _cloudAgentsGrouped;
-            set => this.RaiseAndSetIfChanged(ref _cloudAgentsGrouped, value);
+            get => _cloudAgents;
+            set => this.RaiseAndSetIfChanged(ref _cloudAgents, value);
         }
 
         private bool _refreshingCloudAgents;

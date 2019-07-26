@@ -16,7 +16,7 @@ namespace Osma.Mobile.App.ViewModels.Account
             IUserDialogs userDialogs,
             INavigationService navigationService
         ) : base(
-            "Account",
+            nameof(AccountViewModel),
             userDialogs,
             navigationService
         )
@@ -29,6 +29,10 @@ namespace Osma.Mobile.App.ViewModels.Account
 #endif
         }
 
+        public override async Task InitializeAsync(object navigationData)
+        {
+            await base.InitializeAsync(navigationData);
+        }
 
         public async Task NavigateToBackup()
         {

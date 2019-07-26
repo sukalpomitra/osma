@@ -2,41 +2,14 @@
 <ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:forms="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-    xmlns:views="clr-namespace:Osma.Mobile.App.Views.CloudAgents;assembly=Osma.Mobile.App"
     xmlns:converters="clr-namespace:Osma.Mobile.App.Converters;assembly=Osma.Mobile.App"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     x:Class="Osma.Mobile.App.Views.CloudAgents.CloudAgentPage"
+    Title="{Binding Name}"
 >
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="BooleanInverse" />
-            <DataTemplate x:Key="actionTemplate">
-                <ViewCell>
-                    <views:ActionItemView/>
-                </ViewCell>
-            </DataTemplate>
-            <DataTemplate x:Key="multiActionTemplate">
-                <ViewCell>
-                    <views:MultiActionItemView/>
-                </ViewCell>
-            </DataTemplate>
-            <DataTemplate x:Key="statusTemplate">
-                <ViewCell>
-                    <views:StatusItemView/>
-                </ViewCell>
-            </DataTemplate>
-             <DataTemplate x:Key="errorTemplate">
-                <ViewCell>
-                    <views:ErrorItemView/>
-                </ViewCell>
-            </DataTemplate>
-            <views:CloudAgentTransactionTemplateSelector
-                x:Key="cloudAgentTransactionTemplateSelector"
-                ActionTemplate="{StaticResource actionTemplate}"
-                MultiActionTemplate="{StaticResource multiActionTemplate}"
-                StatusTemplate="{StaticResource statusTemplate}"
-                ErrorTemplate="{StaticResource errorTemplate}"
-            />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -49,21 +22,21 @@
                 AbsoluteLayout.LayoutFlags="SizeProportional"
                 BackgroundColor="{StaticResource NavigationBarColor}"
             >
-                    <Grid
+                <Grid
                         IsClippedToBounds="false"
                     >
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="64"/>
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="64"/>
+                        <RowDefinition Height="32" />
+                        <RowDefinition Height="32" />
 
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="48" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="48" />
-                            </Grid.ColumnDefinitions>
-                            <ImageButton
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="48" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="48" />
+                    </Grid.ColumnDefinitions>
+                    <ImageButton
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 Source="back_icon.png"
@@ -71,19 +44,16 @@
                                 Command="{Binding NavigateBackCommand}"
                                 Style="{StaticResource IconButtonStyle}"
                             />
-                            <forms:CachedImage
+                    <Label
                                 Grid.Row="0"
                                 Grid.Column="1"
-                                VerticalOptions="Center"
-                                HorizontalOptions="Center"
-                                HeightRequest="48"
-                                WidthRequest="48"
-                                FadeAnimationEnabled="true"
-                                DownsampleUseDipUnits="true"
-                                Source="{ Binding CloudAgentImageUrl }"
-                                Aspect="AspectFit"
+                                FontSize="Medium"
+                                TextColor="{StaticResource NavigationBarTextColor}"
+                                Text="{Binding CloudAgentLabel}"
+                                FontAttributes="Bold"
+                                HorizontalTextAlignment="Center"
                             />
-                            <ImageButton
+                    <ImageButton
                                 VerticalOptions="Start"
                                 Grid.Row="0"
                                 Grid.Column="2"
@@ -91,39 +61,32 @@
                                 Style="{StaticResource IconButtonStyle}"
                                Clicked="ToggleModalTapped"
                             />
-                            
-                            <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                FontSize="Medium"
-                                TextColor="{StaticResource NavigationBarTextColor}"
-                                Text="{Binding CloudAgentName}"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                            />
-                            <Label
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                FontSize="Small"
-                                TextColor="{StaticResource NavigationBarTextColor}"
-                                Text="{ Binding CloudAgentSubtitle }"
-                                HorizontalTextAlignment="Center"
-                            />
-                    </Grid>
-            <ListView
-                SelectionMode="None"
-                HasUnevenRows="true"
-                BackgroundColor="{StaticResource BasePageColor}"
-                ItemsSource="{Binding Transactions}"
-                IsRefreshing="{Binding RefreshingTransactions}"
-                IsPullToRefreshEnabled="True"
-                RefreshCommand="{Binding RefreshTransactionsCommand}"
-                ItemTemplate="{StaticResource cloudAgentTransactionTemplateSelector}"
-                SeparatorVisibility="None"
-            />
-                
+                    
+                </Grid>
+                <StackLayout>
+                    <Label
+                        HorizontalOptions="CenterAndExpand"
+                        FontSize="Small"
+                        TextColor="{StaticResource NavigationBarTextColor}"
+                        Text="{ Binding CloudAgentName }"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label
+                        HorizontalOptions="CenterAndExpand"
+                        FontSize="Small"
+                        TextColor="{StaticResource NavigationBarTextColor}"
+                        Text="{Binding TheirVK, StringFormat='Their VK:  {0}'}"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label
+                        HorizontalOptions="CenterAndExpand"
+                        FontSize="Small"
+                        TextColor="{StaticResource NavigationBarTextColor}"
+                        Text="{Binding CloudAgentEndPointString, StringFormat='Cloud Agent EndPoints:  {0}'}"
+                        HorizontalTextAlignment="Center"
+                    />
+
+                </StackLayout>
             </StackLayout>
             <Frame
                 AbsoluteLayout.LayoutFlags="XProportional, WidthProportional, HeightProportional"
@@ -144,44 +107,7 @@
                         BackgroundColor="White"
                         Opacity="1"
                     >
-                        <StackLayout Orientation="Horizontal">
-                            <forms:CachedImage
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                VerticalOptions="Center"
-                                HorizontalOptions="Center"
-                                HeightRequest="24"
-                                WidthRequest="24"
-                                FadeAnimationEnabled="true"
-                                DownsampleUseDipUnits="true"
-                                Source="{ Binding CloudAgentImageUrl }"
-                                Aspect="AspectFit"
-                            />
-                            <Label
-                                Text="{Binding TheirDid, StringFormat='did:  {0}'}"
-                                TextColor="Black"
-                                FontSize="Small"
-                            />
-                        </StackLayout>
-                        <StackLayout Orientation="Horizontal">
-                            <forms:CachedImage
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                VerticalOptions="Start"
-                                HorizontalOptions="Center"
-                                HeightRequest="24"
-                                WidthRequest="24"
-                                FadeAnimationEnabled="true"
-                                DownsampleUseDipUnits="true"
-                                Source="{ Binding CloudAgentImageUrl }"
-                                Aspect="AspectFit"
-                            />
-                            <Label
-                                Text="{Binding MyDid, StringFormat='did:  {0}'}"
-                                TextColor="Black"
-                                FontSize="Small"
-                            />
-                        </StackLayout>
+                        
                         <Button
                             HorizontalOptions="FillAndExpand"
                             Text="Delete Cloud Agent"

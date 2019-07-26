@@ -30,7 +30,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             ICustomAgentContextProvider agentContextProvider,
             ILifetimeScope scope
             ) : base(
-                "Credentials",
+                nameof(CredentialsViewModel),
                 userDialogs,
                 navigationService
            )

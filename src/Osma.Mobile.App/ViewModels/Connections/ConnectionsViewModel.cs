@@ -36,7 +36,10 @@ namespace Osma.Mobile.App.ViewModels.Connections
                                     ICustomAgentContextProvider agentContextProvider,
                                     IEventAggregator eventAggregator,
                                     ILifetimeScope scope) :
-                                    base("Connections", userDialogs, navigationService)
+                                    base(
+                                        nameof(ConnectionsViewModel), 
+                                        userDialogs, 
+                                        navigationService)
         {
             _connectionService = connectionService;
             _agentContextProvider = agentContextProvider;
@@ -47,7 +50,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshConnections();
-            if (!isRefreshStarted) await BackgroundRefresh();
+            if (!isRefreshStarted) _ = BackgroundRefreshConnections();
 
             _eventAggregator.GetEventByType<ApplicationEvent>()
                             .Where(_ => _.Type == ApplicationEventType.ConnectionsUpdated)
@@ -56,7 +59,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
             await base.InitializeAsync(navigationData);
         }
 
-        public async Task BackgroundRefresh()
+        public async Task BackgroundRefreshConnections()
         {
             isRefreshStarted = true;
             for (long i = 0; i <= long.MaxValue; i++)

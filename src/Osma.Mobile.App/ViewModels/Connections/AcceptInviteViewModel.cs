@@ -34,7 +34,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                                      IMessageService messageService,
                                      ICustomAgentContextProvider contextProvider,
                                      IEventAggregator eventAggregator)
-                                     : base("Accept Invitiation", userDialogs, navigationService)
+                                     : base(nameof(AcceptInviteViewModel), userDialogs, navigationService)
         {
             _provisioningService = provisioningService;
             _connectionService = connectionService;

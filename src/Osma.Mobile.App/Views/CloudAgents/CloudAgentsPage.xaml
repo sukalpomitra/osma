@@ -17,24 +17,47 @@
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
         <ToolbarItem Name="Add Connection" Order="Primary" Text="Connect" Priority="0" Command ="{Binding ScanInviteCommand}"/>
-        <ToolbarItem Name="AccountInformation" Order="Secondary" Text="Account Information" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CheckAccountCommand}"/>
-        <ToolbarItem Name="CreateInvitation" Order="Secondary" Text="Create Invitation" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CreateInvitationCommand}"/>
+        <ToolbarItem Name="Account Information" Order="Secondary" Text="Account Information" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CheckAccountCommand}"/>
+        <ToolbarItem Name="Create Invitation" Order="Secondary" Text="Create Invitation" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CreateInvitationCommand}"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
-            <ListView HasUnevenRows="true"
-                IsPullToRefreshEnabled="true"
-                IsRefreshing="{Binding RefreshingCloudAgents}"
-                RefreshCommand="{Binding RefreshCommand}"
-                IsEnabled="{Binding RefreshingCloudAgents, Converter={StaticResource BooleanInverse}}"
-                ItemsSource="{Binding CloudAgentsGrouped}"
-             >
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <components:DetailedCell Title="{ Binding Label }"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <StackLayout>
+                <ListView 
+                    HasUnevenRows="true"
+                    IsPullToRefreshEnabled="true"
+                    IsRefreshing="{Binding RefreshingCloudAgents}"
+                    RefreshCommand="{Binding RefreshCommand}"
+                    IsEnabled="{Binding RefreshingCloudAgents, Converter={StaticResource BooleanInverse}}"
+                    ItemsSource="{Binding CloudAgentsGrouped}"
+                >
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <components:DetailedCell Title="{ Binding CloudAgentLabel }"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.Behaviors>
+                        <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectCloudAgentCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true"/>
+                    </ListView.Behaviors>
+                </ListView>
+                <StackLayout
+                VerticalOptions="FillAndExpand"
+                IsVisible="{Binding HasCloudAgents, Converter={StaticResource BooleanInverse}}">
+                    <StackLayout
+                    Orientation="Vertical"
+                    VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="CenterAndExpand">
+                        <ActivityIndicator
+                        IsVisible="{Binding RefreshingCloudAgents}"
+                        IsRunning="{Binding RefreshingCloudAgents}"/>
+                        <Label
+                        HorizontalOptions="CenterAndExpand"
+                        HorizontalTextAlignment="Center"
+                        IsVisible="{Binding RefreshingCloudAgents, Converter={StaticResource BooleanInverse}}" 
+                        Text="You have no cloud agents registered - Click connect to get started" />
+                    </StackLayout>
+                </StackLayout>
+            </StackLayout>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

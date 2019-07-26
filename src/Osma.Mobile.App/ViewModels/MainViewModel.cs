@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.ViewModels.Account;
@@ -37,8 +38,8 @@ namespace Osma.Mobile.App.ViewModels
         {
             await Connections.InitializeAsync(null);
             await Credentials.InitializeAsync(null);
-            await Account.InitializeAsync(null);
             await CloudAgents.InitializeAsync(null);
+            await Account.InitializeAsync(null);
             await CreateInvitation.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
         }
