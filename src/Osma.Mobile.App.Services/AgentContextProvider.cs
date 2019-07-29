@@ -9,6 +9,7 @@ using AgentFramework.AspNetCore;
 using Hyperledger.Indy.WalletApi;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
+using AgentFramework.Core.Models;
 
 namespace Osma.Mobile.App.Services
 {
@@ -88,7 +89,9 @@ namespace Osma.Mobile.App.Services
             return new AgentContext
             {
                 Did = _options.Did,
-                Wallet = wallet
+                Wallet = wallet,
+                Pool = new PoolAwaitable(() => _poolService.GetPoolAsync(
+                    _options.PoolOptions.PoolName, _options.PoolOptions.ProtocolVersion))
             };
         }
 

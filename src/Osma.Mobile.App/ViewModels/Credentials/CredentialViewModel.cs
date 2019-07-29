@@ -54,7 +54,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private async Task CreateCredentialRequest()
         {
             var context = await _agentContextProvider.GetContextAsync();
-            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.CredentialDefinitionId);
+            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
             var rsp = await _messageService.SendAsync(context.Wallet, msg, rec);
         }
 
