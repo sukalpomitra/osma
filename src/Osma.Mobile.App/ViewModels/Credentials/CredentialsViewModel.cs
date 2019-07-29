@@ -61,33 +61,6 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             var context = await _agentContextProvider.GetContextAsync();
             var credentialsRecords = await _credentialService.ListAsync(context);
 
-//#if DEBUG
-//            credentialsRecords.Add(new CredentialRecord
-//            {
-//                ConnectionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialDefinitionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialRevocationId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                State = CredentialState.Issued,
-//            });
-//            credentialsRecords.Add(new CredentialRecord
-//            {
-//                ConnectionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialDefinitionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialRevocationId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                State = CredentialState.Issued,
-//            });
-//            credentialsRecords.Add(new CredentialRecord
-//            {
-//                ConnectionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialDefinitionId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                CredentialRevocationId = Guid.NewGuid().ToString().ToLowerInvariant(),
-//                State = CredentialState.Issued,
-//            });
-//#endif
-
             IList<CredentialViewModel> credentialsVms = new List<CredentialViewModel>();
             foreach (var credentialRecord in credentialsRecords)
             {
@@ -142,11 +115,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
         }
 
-        private async Task CreateCredentialRequest(IAgentContext context, string offerId)
-        {
-            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, offerId);
-            var rsp = await _messageService.SendAsync(context.Wallet, msg, rec);
-        }
+       
 
 
 

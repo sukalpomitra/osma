@@ -7,6 +7,8 @@ using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
 using AgentFramework.Core.Models.Records;
+using AgentFramework.Core.Contracts;
+using System.Threading.Tasks;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
@@ -14,9 +16,16 @@ namespace Osma.Mobile.App.ViewModels.Credentials
     {
         private readonly CredentialRecord _credential;
 
+        private readonly ICredentialService _credentialService;
+        private readonly ICustomAgentContextProvider _agentContextProvider;
+        private readonly IMessageService _messageService;
+
         public CredentialViewModel(
             IUserDialogs userDialogs,
             INavigationService navigationService,
+            ICredentialService credentialService,
+            ICustomAgentContextProvider agentContextProvider,
+            IMessageService messageService,
             CredentialRecord credential
         ) : base(
             nameof(CredentialViewModel),
@@ -25,53 +34,16 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         )
         {
             _credential = credential;
+            _credentialService = credentialService;
+            _agentContextProvider = agentContextProvider;
+            _messageService = messageService;
+
             string schemaId = credential.SchemaId;
             CredentialName = (schemaId.Split(':')[2]).Replace(" schema", "") + " - " + (schemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
 
             _isNew = IsCredentialNew(_credential);
-
-            //#if DEBUG
-            //_credentialName = "Credential Name";
-            //_credentialImageUrl = "http://placekitten.com/g/200/200";
-            //_credentialSubtitle = "10/22/2017";
-            //_credentialType = "Bank Statement";
-            //_qRImageUrl = "http://placekitten.com/g/100/100";
-
-            //var attributes = new List<CredentialAttribute>( new CredentialAttribute[] {
-            //    new CredentialAttribute
-            //    {
-            //        Type="Text",
-            //        Name="First Name",
-            //        Value="Jamie"
-            //    },
-            //    new CredentialAttribute
-            //    {
-            //        Type="Text",
-            //        Name="Last Name",
-            //        Value="Doe"
-            //    },
-            //    new CredentialAttribute
-            //    {
-            //        Type = "Text",
-            //        Name = "Country of Residence",
-            //        Value = "New Zealand"
-            //    },
-            //    new CredentialAttribute
-            //    {
-            //        Type="File",
-            //        Name="Statement",
-            //        Value="Statement.pdf",
-            //        FileExt="PDF",
-            //        Date="05 Aug 2018"
-            //    }
-            //});
-            //_attributes = attributes
-            //    .OrderByDescending(o=>o.Type).OrderBy(o=>o.Date);
-            //#endif
         }
-
-
         private bool IsCredentialNew(CredentialRecord credential)
         {
             // TODO OS-200, Currently a Placeholder for a mix of new and not new cells
@@ -79,14 +51,26 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             return random.Next(0, 2) == 1;
         }
 
-#region Bindable Command
+        private async Task CreateCredentialRequest()
+        {
+            var context = await _agentContextProvider.GetContextAsync();
+            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.CredentialDefinitionId);
+            var rsp = await _messageService.SendAsync(context.Wallet, msg, rec);
+        }
+
+        #region Bindable Command
+
         public ICommand NavigateBackCommand => new Command(async () =>
         {
             await NavigationService.PopModalAsync();
         });
-#endregion
 
-#region Bindable Properties
+        public ICommand AcceptCredentialCommand => new Command(async () => { await CreateCredentialRequest(); });
+
+        #endregion
+
+        #region Bindable Properties
+
         private string _credentialName;
         public string CredentialName
         {
@@ -136,6 +120,6 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             set => this.RaiseAndSetIfChanged(ref _attributes, value);
         }
 
-#endregion
+        #endregion
     }
 }
