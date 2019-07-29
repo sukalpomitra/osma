@@ -22,12 +22,14 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private readonly ICredentialService _credentialService;
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ILifetimeScope _scope;
+        private readonly IMessageService _messageService;
 
         public CredentialsViewModel(
             IUserDialogs userDialogs,
             INavigationService navigationService,
             ICredentialService credentialService,
             ICustomAgentContextProvider agentContextProvider,
+            IMessageService messageService,
             ILifetimeScope scope
             ) : base(
                 nameof(CredentialsViewModel),
@@ -38,6 +40,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
             _credentialService = credentialService;
             _agentContextProvider = agentContextProvider;
+            _messageService = messageService;
             _scope = scope;
 
             this.WhenAnyValue(x => x.SearchTerm)
@@ -137,6 +140,12 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
             return grouped;
 
+        }
+
+        private async Task CreateCredentialRequest(IAgentContext context, string offerId)
+        {
+            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, offerId);
+            var rsp = await _messageService.SendAsync(context.Wallet, msg, rec);
         }
 
 
