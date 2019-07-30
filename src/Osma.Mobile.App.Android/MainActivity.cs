@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Acr.UserDialogs;
 using Android;
@@ -8,13 +10,12 @@ using Android.OS;
 using Autofac;
 using FFImageLoading.Forms.Platform;
 using Java.Lang;
-using Osma.Mobile.App.Converters;
 using Xamarin.Forms;
 
 namespace Osma.Mobile.App.Droid
 {
     [Activity(Label = "Osma", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle bundle)
         {
@@ -58,11 +59,42 @@ namespace Osma.Mobile.App.Droid
             builder.RegisterModule(new PlatformModule());
             var container = builder.Build();
 
-            Xamarin.Forms.Forms.Init(this, bundle);
+            Forms.Init(this, bundle);
             XF.Material.Droid.Material.Init(this, bundle);
 
+            // TODO: Implement the same for IOS
+
+            // Read genesis file from asset folder as bytes
+            Stream input = Assets.Open("pool_genesis.Remote.txn");
+            byte[] buffer = ReadFully(input);
+
+            // Write genesis file to internal storage
+            var genesisFilePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "pool_genesis.Remote.txn");
+            Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" + genesisFilePath);
+            bool fileExists = File.Exists(genesisFilePath);
+            if (fileExists) File.Delete(genesisFilePath);
+            BinaryWriter writer = new BinaryWriter(File.Open(genesisFilePath, FileMode.OpenOrCreate));
+            writer.Write(buffer);
+            writer.Flush();
+            writer.Close();
+
             LoadApplication(new App(container));
-#endif
+        #endif
+        }
+
+        private static byte[] ReadFully(Stream stream)
+        {
+            byte[] buffer = new byte[32768];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                while (true)
+                {
+                    int read = stream.Read(buffer, 0, buffer.Length);
+                    if (read <= 0)
+                        return ms.ToArray();
+                    ms.Write(buffer, 0, read);
+                }
+            }
         }
 
         readonly string[] _permissionsRequired =
@@ -103,4 +135,3 @@ namespace Osma.Mobile.App.Droid
         }
     }
 }
-
