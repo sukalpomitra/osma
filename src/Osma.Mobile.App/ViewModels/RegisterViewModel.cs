@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
@@ -33,13 +34,15 @@ namespace Osma.Mobile.App.ViewModels
         {
             var dialog = UserDialogs.Instance.Loading("Creating wallet");
 
+            var genesisFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "pool_genesis.Remote.txn");
+
             //TODO this register VM will have far more logic around the registration complexities, i.e backupservices
             //suppling ownership info to the agent etc..
             var options = new AgentOptions
             {
                 PoolOptions = new PoolOptions
                 {
-                    GenesisFilename = "pool_genesis.Remote.txn",
+                    GenesisFilename = genesisFilePath,
                     PoolName = "EdgeAgentPoolConnection",
                     ProtocolVersion = 2
                 },
