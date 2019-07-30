@@ -32,7 +32,7 @@ namespace Osma.Mobile.App.ViewModels
         public ICommand CreateWalletCommand => new Command(async () =>
         {
             var dialog = UserDialogs.Instance.Loading("Creating wallet");
-            
+
             //TODO this register VM will have far more logic around the registration complexities, i.e backupservices
             //suppling ownership info to the agent etc..
             var options = new AgentOptions

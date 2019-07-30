@@ -66,6 +66,8 @@ namespace Osma.Mobile.App.Services
             await _keyValueStoreService.SetDataAsync(AgentOptionsKey, options);
             _options = options;
 
+            await _poolService.CreatePoolAsync(_options.PoolOptions.PoolName, _options.PoolOptions.GenesisFilename);
+
             return true;
         }
 
