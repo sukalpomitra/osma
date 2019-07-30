@@ -149,7 +149,17 @@
                 <Setter Property="TextColor" Value="{StaticResource LightTextColor}" />
                 <Setter Property="BackgroundColor" Value="{StaticResource RedAccentColor}" />
             </Style>
-            
+
+            <Style
+                x:Key="ButtonStyleAccept"
+                TargetType="Button"
+                ApplyToDerivedTypes="true"
+                BasedOn="{StaticResource ButtonStyleBase}"
+            >
+                <Setter Property="TextColor" Value="{StaticResource LightTextColor}" />
+                <Setter Property="BackgroundColor" Value="{StaticResource GreenAccentColor}" />
+            </Style>
+
             <Style
                 x:Key="IconButtonStyle"
                 TargetType="ImageButton"

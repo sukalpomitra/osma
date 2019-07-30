@@ -24,9 +24,11 @@ namespace Osma.Mobile.App.Droid
 
             base.OnCreate(bundle);
 
-            Rg.Plugins.Popup.Popup.Init(this, bundle);
-
             Forms.Init(this, bundle);
+
+            XF.Material.Droid.Material.Init(this, bundle);
+
+            Rg.Plugins.Popup.Popup.Init(this, bundle);
 
             // Initializing FFImageLoading
             CachedImageRenderer.Init(false);
@@ -59,8 +61,7 @@ namespace Osma.Mobile.App.Droid
             builder.RegisterModule(new PlatformModule());
             var container = builder.Build();
 
-            Forms.Init(this, bundle);
-            XF.Material.Droid.Material.Init(this, bundle);
+            
 
             // TODO: Implement the same for IOS
 
@@ -68,15 +69,15 @@ namespace Osma.Mobile.App.Droid
             Stream input = Assets.Open("pool_genesis.Remote.txn");
             byte[] buffer = ReadFully(input);
 
-            // Write genesis file to internal storage
+            // Write genesis file to internal storage (can be accessed only by our application)
             var genesisFilePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "pool_genesis.Remote.txn");
-            Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" + genesisFilePath);
             bool fileExists = File.Exists(genesisFilePath);
             if (fileExists) File.Delete(genesisFilePath);
             BinaryWriter writer = new BinaryWriter(File.Open(genesisFilePath, FileMode.OpenOrCreate));
             writer.Write(buffer);
             writer.Flush();
             writer.Close();
+
 
             LoadApplication(new App(container));
         #endif
