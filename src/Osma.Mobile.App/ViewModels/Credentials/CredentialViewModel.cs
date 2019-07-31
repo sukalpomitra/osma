@@ -41,7 +41,11 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             string schemaId = credential.SchemaId;
             CredentialName = (schemaId.Split(':')[2]).Replace(" schema", "") + " - " + (schemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
-
+            if (credential.State == CredentialState.Issued)
+                Attributes = credential.CredentialAttributesValues
+                    .Select(p => new CredentialAttribute()
+                    { Name = p.Name, Value = p.Value?.ToString(), Type="Text"})
+                    .ToList();
             _isNew = IsCredentialNew(_credential);
         }
         private bool IsCredentialNew(CredentialRecord credential)
