@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
+using AgentFramework.Core.Messages;
 using AgentFramework.Core.Models.Wallets;
+using Autofac;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
 using Osma.Mobile.App.Views.UserRegistration;
@@ -15,16 +17,20 @@ namespace Osma.Mobile.App.ViewModels
     {
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly INavigationService _navigationService;
+        private readonly ILifetimeScope _scope;
 
         public FullNameViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
-                                 ICustomAgentContextProvider agentContextProvider) : base(
+                                 ICustomAgentContextProvider agentContextProvider,
+                                 ILifetimeScope scope
+                                 ) : base(
                                  nameof(FullNameViewModel), 
                                  userDialogs, 
                                  navigationService)
         {
             _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
+            _scope = scope;
         }
 
 
@@ -39,7 +45,11 @@ namespace Osma.Mobile.App.ViewModels
         #endregion
 
         #region Bindable Command    
-        public ICommand OpenEmailAddressPageCommand => new Command(async () => await _navigationService.NavigateToAsync<EmailAddressViewModel>());
+        public ICommand OpenEmailAddressPageCommand => new Command(async () =>
+        {
+            var vm = _scope.Resolve<EmailAddressViewModel>(new NamedParameter("fullName", FullName));
+            await _navigationService.NavigateToAsync(vm);
+        });
 
         #endregion
     }

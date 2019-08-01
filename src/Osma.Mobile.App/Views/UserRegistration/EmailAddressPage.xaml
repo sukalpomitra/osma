@@ -6,11 +6,15 @@
              mc:Ignorable="d"
              x:Class="Osma.Mobile.App.Views.UserRegistration.EmailAddressPage">
       <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-          <Label Text="Welcome to email page!" />
+        <Label Text="{Binding FullName, StringFormat='The angle is {0} degrees'}" />
+          <Label Text="We are so happy that you are here! We just need a few personal details." />
+          <Label Text="What is your email address?"/>
+        <Entry Text="{Binding EmailAddress}" 
+                 Placeholder="Please enter your email address here"
+                 PlaceholderColor="Olive"/>
         <Button 
                 VerticalOptions="CenterAndExpand"
-                Text="Next"
+                Text="Advance"
                 Command="{Binding OpenPhoneNumberPageCommand}"/>
     </StackLayout>
 </ContentPage>
