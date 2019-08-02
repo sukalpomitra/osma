@@ -9,6 +9,7 @@ using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
 using Osma.Mobile.App.Views.Legal;
 using Osma.Mobile.App.Views.UserRegistration;
+using ReactiveUI;
 using Xamarin.Forms;
 
 namespace Osma.Mobile.App.ViewModels
@@ -27,7 +28,18 @@ namespace Osma.Mobile.App.ViewModels
         {
             _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
+            //set Account Object to have the full Name. But figure where the account is beingcreated. 
         }
+
+        #region Bindable Property
+        private string _fullName;
+        public string FullName
+        {
+            get => _fullName;
+            set => this.RaiseAndSetIfChanged(ref _fullName, value);
+        }
+
+        #endregion
 
         #region Bindable Commands
         public ICommand CreateWalletCommand => new Command(async () =>
@@ -50,7 +62,8 @@ namespace Osma.Mobile.App.ViewModels
                 {
                     WalletConfiguration = new WalletConfiguration {Id = Guid.NewGuid().ToString() },
                     WalletCredentials = new WalletCredentials {Key = "LocalWalletKey" }
-                }
+                },
+                Name = "Dummy Doe"
             };
 
             if (await _agentContextProvider.CreateAgentAsync(options))
@@ -67,7 +80,7 @@ namespace Osma.Mobile.App.ViewModels
             }
         });
 
-        public ICommand OpenFullNamePageCommand => new Command(async () => await _navigationService.NavigateToAsync<FullNameViewModel>());
+        //public ICommand OpenFullNamePageCommand => new Command(async () => await _navigationService.NavigateToAsync<FullNameViewModel>());
         #endregion
     }
 }

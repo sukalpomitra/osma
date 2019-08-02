@@ -3,21 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Osma.Mobile.App.Views.RegisterPage">
     <ContentPage.Content>
-        <StackLayout
-            Spacing="150"
-            VerticalOptions="Center">
-            <Label
+        <StackLayout>
+            <!--<Label
                 FontSize="20"
                 HorizontalOptions="Center"
-                Text="Welcome to Osma"></Label>
+                Text="Welcome to Osma"></Label>-->
+            <Label Text="Welcome to the red.dot"/>
+            <Label Text="To create your ID we will need to collect some personal information." />
+            <Label Text="Let's start with your full name:" />
+            <Entry Text="{Binding FullName}"
+               x:Name="fullName"
+               Placeholder="Please enter full name"
+               PlaceholderColor="Olive"
+               MaxLength="30"/>
             <Button 
                 VerticalOptions="CenterAndExpand"
                 Text="Create Wallet"
                 Command="{Binding CreateWalletCommand}"/>
-            <Button 
-                VerticalOptions="CenterAndExpand"
-                Text="Open fullName entry"
-                Command="{Binding OpenFullNamePageCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

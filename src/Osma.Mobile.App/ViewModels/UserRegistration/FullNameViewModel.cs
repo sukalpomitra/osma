@@ -17,12 +17,12 @@ namespace Osma.Mobile.App.ViewModels
     {
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly INavigationService _navigationService;
-        private readonly ILifetimeScope _scope;
+        //private readonly ILifetimeScope _scope;
 
         public FullNameViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
-                                 ICustomAgentContextProvider agentContextProvider,
-                                 ILifetimeScope scope
+                                 ICustomAgentContextProvider agentContextProvider
+                                 //ILifetimeScope scope
                                  ) : base(
                                  nameof(FullNameViewModel), 
                                  userDialogs, 
@@ -30,7 +30,7 @@ namespace Osma.Mobile.App.ViewModels
         {
             _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
-            _scope = scope;
+            //_scope = scope;
         }
 
 
@@ -47,8 +47,8 @@ namespace Osma.Mobile.App.ViewModels
         #region Bindable Command    
         public ICommand OpenEmailAddressPageCommand => new Command(async () =>
         {
-            var vm = _scope.Resolve<EmailAddressViewModel>(new NamedParameter("fullName", FullName));
-            await _navigationService.NavigateToAsync(vm);
+            //var vm = _scope.Resolve<RegisterViewModel>(new NamedParameter("fullName", FullName));
+            //await _navigationService.NavigateToAsync(vm);
         });
 
         #endregion

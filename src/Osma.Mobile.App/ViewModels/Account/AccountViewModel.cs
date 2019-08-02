@@ -12,9 +12,11 @@ namespace Osma.Mobile.App.ViewModels.Account
 {
     public class AccountViewModel : ABaseViewModel
     {
+        private readonly ICustomAgentContextProvider _agentContextProvider;
         public AccountViewModel(
             IUserDialogs userDialogs,
-            INavigationService navigationService
+            INavigationService navigationService,
+            ICustomAgentContextProvider agentContextProvider
         ) : base(
             nameof(AccountViewModel),
             userDialogs,

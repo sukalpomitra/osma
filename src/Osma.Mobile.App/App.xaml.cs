@@ -49,7 +49,6 @@ namespace Osma.Mobile.App
         Task InitializeTask;
         private async Task Initialize()
         {
-            //Pages // do we need this? - Amul
             _navigationService.AddPageViewModelBinding<MainViewModel, MainPage>();
             _navigationService.AddPageViewModelBinding<ConnectionsViewModel, ConnectionsPage>();
             _navigationService.AddPageViewModelBinding<ConnectionViewModel, ConnectionPage>();
