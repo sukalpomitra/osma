@@ -13,6 +13,9 @@ using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Utilities;
+using Osma.Mobile.App.ViewModels.Account;
+using Osma.Mobile.App.ViewModels.CloudAgents;
+using Osma.Mobile.App.ViewModels.CreateInvitation;
 using ReactiveUI;
 using Xamarin.Forms;
 
@@ -31,7 +34,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             IProofService proofService,
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
-            ILifetimeScope scope
+            ILifetimeScope scope    
             ) : base(
                 nameof(ProofRequestsViewModel),
                 userDialogs,
@@ -108,9 +111,17 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         public ICommand RefreshCommand => new Command(async () => await RefreshProofs());
 
+        public ICommand CreateInvitationCommand => new Command(async () => await NavigationService.NavigateToAsync<CreateInvitationViewModel>());
+
+        public ICommand CloudAgentsCommand => new Command(async () => await NavigationService.NavigateToAsync<CloudAgentsViewModel>());
+
+        public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
+
+
         #endregion
 
         #region Bindable Properties
+
         private RangeEnabledObservableCollection<ProofRequestViewModel> _proofRequests = new RangeEnabledObservableCollection<ProofRequestViewModel>();
         public RangeEnabledObservableCollection<ProofRequestViewModel> ProofRequests
         {
