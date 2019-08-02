@@ -191,7 +191,7 @@
                     <Label
                         Grid.Row="1"
                         Grid.Column="1"
-                        Text="Digital Credential"
+                        Text="Digital Proof Request"
                         FontSize="Default" />
                     <Label
                         Grid.Row="2"
