@@ -10,13 +10,13 @@ using Osma.Mobile.App.ViewModels.Account;
 using Osma.Mobile.App.ViewModels.CloudAgents;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.ViewModels.CreateInvitation;
-using Osma.Mobile.App.ViewModels.Credentials;
+using Osma.Mobile.App.ViewModels.ProofRequests;
 using Osma.Mobile.App.Views;
 using Osma.Mobile.App.Views.Account;
 using Osma.Mobile.App.Views.CloudAgents;
 using Osma.Mobile.App.Views.Connections;
 using Osma.Mobile.App.Views.CreateInvitation;
-using Osma.Mobile.App.Views.Credentials;
+using Osma.Mobile.App.Views.ProofRequests;
 using Osma.Mobile.App.Views.UserRegistration;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -63,6 +63,7 @@ namespace Osma.Mobile.App
             _navigationService.AddPageViewModelBinding<PhoneNumberViewModel, PhoneNumberPage>();
             _navigationService.AddPageViewModelBinding<CloudAgentsViewModel, CloudAgentsPage>();
             _navigationService.AddPageViewModelBinding<CloudAgentViewModel, CloudAgentPage>();
+            _navigationService.AddPageViewModelBinding<ProofRequestsViewModel, ProofRequestsPage>();
 
             if (_contextProvider.AgentExists())
             {
