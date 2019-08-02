@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Osma.Mobile.App.Events
+﻿namespace Osma.Mobile.App.Events
 {
     public enum ApplicationEventType
     {
         ConnectionsUpdated,
-        CloudAgentsUpdated
+        CloudAgentsUpdated,
+        CredentialUpdated
     }
 
     public class ApplicationEvent

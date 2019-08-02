@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using AgentFramework.Core.Models.Records;
 using AgentFramework.Core.Contracts;
 using System.Threading.Tasks;
+using Osma.Mobile.App.Events;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
@@ -19,6 +20,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private readonly ICredentialService _credentialService;
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly IMessageService _messageService;
+        private readonly IEventAggregator _eventAggregator;
 
         public CredentialViewModel(
             IUserDialogs userDialogs,
@@ -26,6 +28,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             ICredentialService credentialService,
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
+            IEventAggregator eventAggregator,
             CredentialRecord credential
         ) : base(
             nameof(CredentialViewModel),
@@ -37,15 +40,24 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             _credentialService = credentialService;
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
+            _eventAggregator = eventAggregator;
 
-            string schemaId = credential.SchemaId;
-            CredentialName = (schemaId.Split(':')[2]).Replace(" schema", "") + " - " + (schemaId.Split(':')[3]);
+            CredentialName = (credential.SchemaId.Split(':')[2]).Replace(" schema", "") + " - " + (credential.SchemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
+
             if (credential.State == CredentialState.Issued)
+            {
                 Attributes = credential.CredentialAttributesValues
-                    .Select(p => new CredentialAttribute()
-                    { Name = p.Name, Value = p.Value?.ToString(), Type="Text"})
+                    .Select(p => 
+                        new CredentialAttribute()
+                        {
+                            Name = p.Name,
+                            Value = p.Value?.ToString(),
+                            Type = "Text"
+                        })
                     .ToList();
+            }
+
             _isNew = IsCredentialNew(_credential);
         }
         private bool IsCredentialNew(CredentialRecord credential)
@@ -55,21 +67,48 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             return random.Next(0, 2) == 1;
         }
 
-        private async Task CreateCredentialRequest()
+        private async Task AcceptCredentialOffer()
         {
+            if (_credential.State != CredentialState.Offered)
+            {
+                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                await NavigationService.PopModalAsync();
+                return;
+            }
+
             var context = await _agentContextProvider.GetContextAsync();
             var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
-            var rsp = await _messageService.SendAsync(context.Wallet, msg, rec);
+            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
+            await NavigationService.PopModalAsync();
+        }
+
+        private async Task RejectCredentialOffer()
+        {
+            if (_credential.State != CredentialState.Offered)
+            {
+                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                await NavigationService.PopModalAsync();
+                return;
+            }
+
+            var context = await _agentContextProvider.GetContextAsync();
+            await _credentialService.RejectOfferAsync(context, _credential.Id);
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
+            await NavigationService.PopModalAsync();
         }
 
         #region Bindable Command
 
-        public ICommand NavigateBackCommand => new Command(async () =>
-        {
-            await NavigationService.PopModalAsync();
-        });
+        public ICommand NavigateBackCommand => new Command(async () => await NavigationService.PopModalAsync());
 
-        public ICommand AcceptCredentialCommand => new Command(async () => { await CreateCredentialRequest(); });
+        public ICommand AcceptCredentialOfferCommand => new Command(async () => await AcceptCredentialOffer());
+
+        public ICommand RejectCredentialOfferCommand => new Command(async () => await RejectCredentialOffer());
 
         #endregion
 
