@@ -8,6 +8,7 @@ using Acr.UserDialogs;
 using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Models.Records;
 using Autofac;
+using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
@@ -22,14 +23,14 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private readonly ICredentialService _credentialService;
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ILifetimeScope _scope;
-        private readonly IMessageService _messageService;
+        private readonly IEventAggregator _eventAggregator;
 
         public CredentialsViewModel(
             IUserDialogs userDialogs,
             INavigationService navigationService,
             ICredentialService credentialService,
             ICustomAgentContextProvider agentContextProvider,
-            IMessageService messageService,
+            IEventAggregator eventAggregator,
             ILifetimeScope scope
             ) : base(
                 nameof(CredentialsViewModel),
@@ -37,10 +38,9 @@ namespace Osma.Mobile.App.ViewModels.Credentials
                 navigationService
            )
         {
-
             _credentialService = credentialService;
             _agentContextProvider = agentContextProvider;
-            _messageService = messageService;
+            _eventAggregator = eventAggregator;
             _scope = scope;
 
             this.WhenAnyValue(x => x.SearchTerm)
@@ -51,6 +51,11 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshCredentials();
+
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                           .Where(_ => _.Type == ApplicationEventType.CredentialUpdated)
+                           .Subscribe(async _ => await RefreshCredentials());
+
             await base.InitializeAsync(navigationData);
         }
 
@@ -61,12 +66,13 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             var context = await _agentContextProvider.GetContextAsync();
             var credentialsRecords = await _credentialService.ListAsync(context);
 
-            IList<CredentialViewModel> credentialsVms = new List<CredentialViewModel>();
-            foreach (var credentialRecord in credentialsRecords)
-            {
-                CredentialViewModel credential = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", credentialRecord));
-                credentialsVms.Add(credential);
-            }
+            credentialsRecords = credentialsRecords
+                .Where(c => c.State == CredentialState.Offered || c.State == CredentialState.Issued)
+                .ToList();
+
+            var credentialsVms = credentialsRecords
+                .Select(c => _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", c)))
+                .ToList();
 
             var filteredCredentialVms = FilterCredentials(SearchTerm, credentialsVms);
             var groupedVms = GroupCredentials(filteredCredentialVms);
@@ -77,53 +83,33 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
             HasCredentials = Credentials.Any();
             RefreshingCredentials = false;
-
         }
 
         public async Task SelectCredential(CredentialViewModel credential) => await NavigationService.NavigateToAsync(credential, null, NavigationType.Modal);
 
         private IEnumerable<CredentialViewModel> FilterCredentials(string term, IEnumerable<CredentialViewModel> credentials)
         {
-            if (string.IsNullOrWhiteSpace(term))
-            {
-                return credentials;
-            }
-            // Basic search
-            var filtered = credentials.Where(credentialViewModel => credentialViewModel.CredentialName.Contains(term));
-            return filtered;
+            if (string.IsNullOrWhiteSpace(term)) return credentials;
+            return credentials.Where(credentialViewModel => credentialViewModel.CredentialName.Contains(term));
         }
 
         private IEnumerable<Grouping<string, CredentialViewModel>> GroupCredentials(IEnumerable<CredentialViewModel> credentialViewModels)
         {
-            var grouped = credentialViewModels
-            .OrderBy(credentialViewModel => credentialViewModel.CredentialName)
-            .GroupBy(credentialViewModel =>
-            {
-                if (string.IsNullOrWhiteSpace(credentialViewModel.CredentialName))
-                {
-                    return "*";
-                }
-                return credentialViewModel.CredentialName[0].ToString().ToUpperInvariant();
-            }) // TODO check credentialName
-            .Select(group =>
-            {
-                return new Grouping<string, CredentialViewModel>(group.Key, group.ToList());
-            }
-            );
-
-            return grouped;
-
+            return credentialViewModels
+                .OrderBy(credentialViewModel => credentialViewModel.CredentialName)
+                .GroupBy(credentialViewModel => {
+                        if (string.IsNullOrWhiteSpace(credentialViewModel.CredentialName)) return "*";
+                        return credentialViewModel.CredentialName[0].ToString().ToUpperInvariant();
+                }) // TODO check credentialName
+                .Select(group => {
+                    return new Grouping<string, CredentialViewModel>(group.Key, group.ToList());
+                });
         }
-
-       
-
-
 
         #region Bindable Command
         public ICommand SelectCredentialCommand => new Command<CredentialViewModel>(async (credentials) =>
         {
-            if (credentials != null)
-                await SelectCredential(credentials);
+            if (credentials != null) await SelectCredential(credentials);
         });
 
         public ICommand RefreshCommand => new Command(async () => await RefreshCredentials());

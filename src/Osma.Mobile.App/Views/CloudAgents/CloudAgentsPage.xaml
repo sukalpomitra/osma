@@ -5,7 +5,7 @@
              xmlns:behaviours="clr-namespace:Osma.Mobile.App.Behaviors;assembly=Osma.Mobile.App"
              xmlns:components="clr-namespace:Osma.Mobile.App.Views.Components;assembly=Osma.Mobile.App"
              x:Class="Osma.Mobile.App.Views.CloudAgents.CloudAgentsPage"
-             Title="{Binding Name}"
+             Title="Cloud Agents"
              xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
              ios:Page.LargeTitleDisplay="Always"
     >
@@ -17,8 +17,6 @@
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
         <ToolbarItem Name="Add Connection" Order="Primary" Text="Connect" Priority="0" Command ="{Binding ScanInviteCommand}"/>
-        <ToolbarItem Name="Account Information" Order="Secondary" Text="Account Information" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CheckAccountCommand}"/>
-        <ToolbarItem Name="Create Invitation" Order="Secondary" Text="Create Invitation" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CreateInvitationCommand}"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>

@@ -30,6 +30,11 @@ namespace Osma.Mobile.App.Services
                 .As<IMessageHandler>();
 
             builder
+                .RegisterType<DefaultProofHandler>()
+                .Keyed<IMessageHandler>("proof")
+                .As<IMessageHandler>();
+
+            builder
                 .RegisterType<DefaultAgent>()
                 .As<IAgent>();
 

@@ -3,8 +3,6 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:Osma.Mobile.App.Converters;assembly=Osma.Mobile.App"
-    xmlns:behaviours="clr-namespace:Osma.Mobile.App.Behaviors;assembly=Osma.Mobile.App"
-    xmlns:components="clr-namespace:Osma.Mobile.App.Views.Components;assembly=Osma.Mobile.App"
     xmlns:zxing="clr-namespace:ZXing.Net.Mobile.Forms;assembly=ZXing.Net.Mobile.Forms"
     xmlns:zxcm="clr-namespace:ZXing.Common;assembly=zxing.portable"
     x:Class="Osma.Mobile.App.Views.CreateInvitation.CreateInvitationPage"
@@ -15,13 +13,6 @@
             <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Name="AccountInformation"
-                     Order="Primary"
-                     Icon="account_icon.png"
-                     Priority="0"
-                     Command ="{Binding CheckAccountCommand}"/>
-    </ContentPage.ToolbarItems>
     <ScrollView>
         <StackLayout Padding="5">
             <StackLayout>
