@@ -2,223 +2,52 @@
 <ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-    xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
-    xmlns:views="clr-namespace:Osma.Mobile.App.Views.ProofRequests;assembly=Osma.Mobile.App"
-    xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+    xmlns:converters="clr-namespace:Osma.Mobile.App.Converters;assembly=Osma.Mobile.App"
+    xmlns:behaviours="clr-namespace:Osma.Mobile.App.Behaviors;assembly=Osma.Mobile.App"
+    xmlns:components="clr-namespace:Osma.Mobile.App.Views.Components;assembly=Osma.Mobile.App"
     x:Class="Osma.Mobile.App.Views.ProofRequests.ProofRequestsPage"
-    Title="Proof Requests"
-    ios:Page.UseSafeArea="true"
->
+    Title="Proof Requests">
     <ContentPage.Resources>
         <ResourceDictionary>
-            <DataTemplate x:Key="textTemplate">
-                <ViewCell>
-                    <StackLayout Padding="24, 16">
-                        <Label 
-                            Text="{Binding Name}"
-                            FontSize="Small" />
-                        <Label
-                            Text="{Binding Value}"
-                            FontSize="Medium"
-                            FontAttributes="Bold" />
-                    </StackLayout>
-                </ViewCell>
-            </DataTemplate>
-            <DataTemplate x:Key="fileTemplate">
-                <ViewCell>
-                    <StackLayout
-                        Padding="24, 16">
-                        <Label
-                            Text="{Binding Name}"
-                            FontSize="Small" />
-                        <Frame
-                            HeightRequest="141.3"
-                            WidthRequest="100"
-                            HorizontalOptions="Start"
-                        >
-                            <Frame
-                                HasShadow="false"
-                                BackgroundColor="Gray"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                                Padding="6, 3"
-                            >
-                                <Label
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    TextColor="White"
-                                    Text="{Binding FileExt}"
-                                    FontSize="Default"
-                                    FontAttributes="Bold"
-                                />
-                            </Frame>
-                        </Frame>
-                        <Label
-                            Text="{Binding Date}"
-                            FontSize="Small"
-                        />
-                    </StackLayout>
-                </ViewCell>
-            </DataTemplate>
-            <DataTemplate x:Key="errorTemplate">
-                <ViewCell>
-                    <StackLayout >
-                        <Label
-                            Text="Error" />
-                    </StackLayout>
-                </ViewCell>
-            </DataTemplate>
-            <views:CredentialAttributeTemplateSelector
-                x:Key="credentialAttributeTemplateSelector"
-                TextTemplate="{StaticResource textTemplate}"
-                FileTemplate="{StaticResource fileTemplate}"
-                ErrorTemplate="{StaticResource errorTemplate}"
-            />
+            <converters:InverseBooleanConverter x:Key="BooleanInverse" />
+            <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout>
-            <StackLayout BackgroundColor="{StaticResource NavigationBarColor}">
-                <Grid IsClippedToBounds="false">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="48" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="48" />
-                    </Grid.ColumnDefinitions>
-                    <ImageButton
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Source="back_icon.png"
-                        VerticalOptions="Start"
-                        Command="{Binding NavigateBackCommand}"
-                        Style="{StaticResource IconButtonStyle}"
-                    />
-                    <Label
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        FontSize="Medium"
-                        TextColor="{StaticResource NavigationBarTextColor}"
-                        Text="{Binding CredentialName}"
-                        FontAttributes="Bold"
-                        HorizontalTextAlignment="Center"
-                    />
-                    <ImageButton
-                        VerticalOptions="Start"
-                        Grid.Row="0"
-                        Grid.Column="2"
-                        Source="more_icon.png"
-                        Style="{StaticResource IconButtonStyle}"
-                        Clicked="ToggleModalTapped"
-                    />
-                </Grid>
-            </StackLayout>
-            <Frame
-                HasShadow="false"
-                BackgroundColor="Transparent"
-                x:Name="moreModal"
-                IsVisible="false">
-                <Frame
-                    HasShadow="true"
-                    HorizontalOptions="End"
-                    VerticalOptions="Start">
-                    <StackLayout>
-                        <Button
-                            HorizontalOptions="FillAndExpand"
-                            Text="Accept Credential"
-                            Command="{Binding AcceptCredentialCommand}"
-                            Style="{StaticResource ButtonStyleAccept}"/>
-                        <Button
-                            HorizontalOptions="FillAndExpand"
-                            Text="Reject Credential"
-                            Style="{StaticResource ButtonStyleDestructive}"/>
-                    </StackLayout>
-                </Frame>
-            </Frame>
-            <StackLayout>
-                <Grid Padding="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <ffimageloading:CachedImage
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Grid.RowSpan="2"
-                        VerticalOptions="Center"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        FadeAnimationEnabled="true"
-                        DownsampleUseDipUnits="true"
-                        Aspect="Fill"
-                        Source="{ Binding CredentialImageUrl }">
-                        <ffimageloading:CachedImage.Transformations>
-                            <fftransformations:CircleTransformation />
-                        </ffimageloading:CachedImage.Transformations>
-                    </ffimageloading:CachedImage>
-                    <ffimageloading:CachedImage
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Grid.RowSpan="2"
-                        VerticalOptions="Center"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        FadeAnimationEnabled="true"
-                        DownsampleUseDipUnits="true"
-                        Aspect="Fill"
-                        Source="{ Binding CredentialImageUrl }">
-                        <ffimageloading:CachedImage.Transformations>
-                            <fftransformations:CircleTransformation />
-                        </ffimageloading:CachedImage.Transformations>
-                    </ffimageloading:CachedImage>
-                    <Label
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        FontSize="Medium"
-                        FontAttributes="Bold"
-                        Text="{Binding CredentialName}" />
-                    <Label
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Text="Digital Credential"
-                        FontSize="Default" />
-                    <Label
-                        Grid.Row="2"
-                        Grid.Column="1"
-                        FontSize="Large"
-                        FontAttributes="Bold"
-                        Text="{Binding CredentialType}" />
-                    <ffimageloading:CachedImage
-                        Grid.Row="2"
-                        Grid.Column="2"
-                        Grid.RowSpan="2"
-                        VerticalOptions="Center"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        FadeAnimationEnabled="true"
-                        DownsampleUseDipUnits="true"
-                        Aspect="Fill"
-                        Source="{ Binding QRImageUrl }">
-                    </ffimageloading:CachedImage>
-                </Grid>
-                <ListView
-                    SeparatorVisibility="None"
-                    BackgroundColor="#eee"
-                    ItemTemplate="{StaticResource credentialAttributeTemplateSelector}"
-                    ItemsSource="{Binding Attributes}"
-                    HasUnevenRows="true">
-                </ListView>
-            </StackLayout>
+            <SearchBar
+                Text="{Binding SearchTerm}"
+                Placeholder="Search Proofs"
+                BackgroundColor="Transparent" />
+            <Label Text="{Binding ProofCount}"></Label>
+            <ListView
+                HasUnevenRows="true"
+                IsPullToRefreshEnabled="true"
+                IsRefreshing="{Binding RefreshingProofs}"
+                RefreshCommand="{Binding RefreshCommand}"
+                IsEnabled="{Binding RefreshingProofs, Converter={StaticResource BooleanInverse}}"
+                ItemsSource="{Binding ProofsGrouped}"
+                IsGroupingEnabled="true"
+                GroupDisplayBinding="{Binding Key}"
+                GroupShortNameBinding="{Binding Key}"
+            >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <components:DetailedCell
+                            Title="{Binding CredentialName}"
+                            Subtitle="{Binding CredentialSubtitle}"
+                        />
+                    </DataTemplate>
+                    <!--<DataTemplate>
+                        <components:DetailedCell
+                            Title="{Binding CredentialName}"
+                            Subtitle="{Binding CredentialSubtitle}"
+                            ImageURL="{Binding CredentialImageUrl}"
+                            IsNew="{Binding IsNew}"
+                        />
+                    </DataTemplate>-->
+                </ListView.ItemTemplate>
+            </ListView>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

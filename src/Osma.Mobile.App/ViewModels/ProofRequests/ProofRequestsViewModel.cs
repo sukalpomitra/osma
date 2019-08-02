@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using AgentFramework.Core.Contracts;
+using AgentFramework.Core.Models.Proofs;
 using AgentFramework.Core.Models.Records;
 using Autofac;
 using Osma.Mobile.App.Extensions;
@@ -60,84 +61,37 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
             var context = await _agentContextProvider.GetContextAsync();
             var proofRecords = await _proofService.ListAsync(context);
+            ProofCount = "we have number of records:" + proofRecords.Count;
 
-            IList<CredentialViewModel> credentialsVms = new List<CredentialViewModel>();
-            foreach (var credentialRecord in proofRecords)
-            {
-                CredentialViewModel credential = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", credentialRecord));
-                credentialsVms.Add(credential);
-            }
+            //IList<CredentialViewModel> credentialsVms = new List<CredentialViewModel>();
+            //foreach (var credentialRecord in proofRecords)
+            //{
+            //    CredentialViewModel credential = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", credentialRecord));
+            //    credentialsVms.Add(credential);
+            //}
 
-            var filteredCredentialVms = FilterCredentials(SearchTerm, credentialsVms);
-            var groupedVms = GroupCredentials(filteredCredentialVms);
-            CredentialsGrouped = groupedVms;
+            //var filteredCredentialVms = FilterCredentials(SearchTerm, credentialsVms);
+            //var groupedVms = GroupCredentials(filteredCredentialVms);
+            //CredentialsGrouped = groupedVms;
 
-            Credentials.Clear();
-            Credentials.InsertRange(filteredCredentialVms);
+            //Credentials.Clear();
+            //Credentials.InsertRange(filteredCredentialVms);
 
-            HasProofs = Credentials.Any();
+            //HasProofs = Credentials.Any();
+            HasProofs = true;
             RefreshingProofs = false;
+            ProofsGrouped = proofRecords;
 
         }
-
-        public async Task SelectCredential(CredentialViewModel credential) => await NavigationService.NavigateToAsync(credential, null, NavigationType.Modal);
-
-        private IEnumerable<CredentialViewModel> FilterCredentials(string term, IEnumerable<CredentialViewModel> credentials)
-        {
-            if (string.IsNullOrWhiteSpace(term))
-            {
-                return credentials;
-            }
-            // Basic search
-            var filtered = credentials.Where(credentialViewModel => credentialViewModel.CredentialName.Contains(term));
-            return filtered;
-        }
-
-        private IEnumerable<Grouping<string, CredentialViewModel>> GroupCredentials(IEnumerable<CredentialViewModel> credentialViewModels)
-        {
-            var grouped = credentialViewModels
-            .OrderBy(credentialViewModel => credentialViewModel.CredentialName)
-            .GroupBy(credentialViewModel =>
-            {
-                if (string.IsNullOrWhiteSpace(credentialViewModel.CredentialName))
-                {
-                    return "*";
-                }
-                return credentialViewModel.CredentialName[0].ToString().ToUpperInvariant();
-            }) // TODO check credentialName
-            .Select(group =>
-            {
-                return new Grouping<string, CredentialViewModel>(group.Key, group.ToList());
-            }
-            );
-
-            return grouped;
-
-        }
-
-       
-
-
 
         #region Bindable Command
-        public ICommand SelectCredentialCommand => new Command<CredentialViewModel>(async (credentials) =>
-        {
-            if (credentials != null)
-                await SelectCredential(credentials);
-        });
-
+        
         public ICommand RefreshCommand => new Command(async () => await RefreshProofs());
 
         #endregion
 
         #region Bindable Properties
-        private RangeEnabledObservableCollection<CredentialViewModel> _credentials = new RangeEnabledObservableCollection<CredentialViewModel>();
-        public RangeEnabledObservableCollection<CredentialViewModel> Credentials
-        {
-            get => _credentials;
-            set => this.RaiseAndSetIfChanged(ref _credentials, value);
-        }
-
+      
         private bool _hasCredentials;
         public bool HasProofs
         {
@@ -159,12 +113,22 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             set => this.RaiseAndSetIfChanged(ref _searchTerm, value);
         }
 
-        private IEnumerable<Grouping<string, CredentialViewModel>> _credentialsGrouped;
-        public IEnumerable<Grouping<string, CredentialViewModel>> CredentialsGrouped
+        private List<ProofRecord> _proofsGrouped;
+
+        public List<ProofRecord> ProofsGrouped
         {
-            get => _credentialsGrouped;
-            set => this.RaiseAndSetIfChanged(ref _credentialsGrouped, value);
+            get => _proofsGrouped;
+            set => this.RaiseAndSetIfChanged(ref _proofsGrouped, value);
         }
+
+        private String _proofCount;
+
+        public String ProofCount
+        {
+            get => _proofCount;
+            set => this.RaiseAndSetIfChanged(ref _proofCount, value);
+        }
+
 
         #endregion
     }

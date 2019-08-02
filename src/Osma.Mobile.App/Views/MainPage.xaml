@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:connections="clr-namespace:Osma.Mobile.App.Views.Connections;assembly=Osma.Mobile.App"
     xmlns:credentials="clr-namespace:Osma.Mobile.App.Views.Credentials;assembly=Osma.Mobile.App"
-    xmlns:cloudAgents="clr-namespace:Osma.Mobile.App.Views.CloudAgents;assembly=Osma.Mobile.App"
+    xmlns:proofRequests="clr-namespace:Osma.Mobile.App.Views.ProofRequests;assembly=Osma.Mobile.App"
     xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
     x:Class="Osma.Mobile.App.Views.MainPage"
     CurrentPageChanged="CurrentPageChanged"
@@ -20,9 +20,10 @@
         ios:NavigationPage.PrefersLargeTitles="true"
         BindingContext="{Binding Credentials}">
     </credentials:CredentialsPage>
-    <cloudAgents:CloudAgentsPage
+    <proofRequests:ProofRequestsPage 
         Icon="credentials_icon.png"
         ios:NavigationPage.PrefersLargeTitles="true"
-        BindingContext="{Binding CloudAgents}">
-    </cloudAgents:CloudAgentsPage>
+        BindingContext="{Binding ProofRequests}">
+    </proofRequests:ProofRequestsPage>
+    
 </TabbedPage>

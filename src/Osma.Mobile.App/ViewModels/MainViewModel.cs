@@ -7,6 +7,7 @@ using Osma.Mobile.App.ViewModels.CloudAgents;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.ViewModels.CreateInvitation;
 using Osma.Mobile.App.ViewModels.Credentials;
+using Osma.Mobile.App.ViewModels.ProofRequests;
 using ReactiveUI;
 
 namespace Osma.Mobile.App.ViewModels
@@ -19,7 +20,7 @@ namespace Osma.Mobile.App.ViewModels
             ConnectionsViewModel connectionsViewModel,
             CredentialsViewModel credentialsViewModel,
             AccountViewModel accountViewModel,
-            CloudAgentsViewModel cloudAgentsViewModel,
+            ProofRequestsViewModel proofRequestsViewModel,
             CreateInvitationViewModel createInvitationViewModel
         ) : base(
                 nameof(MainViewModel),
@@ -30,7 +31,7 @@ namespace Osma.Mobile.App.ViewModels
             Connections = connectionsViewModel;
             Credentials = credentialsViewModel;
             Account = accountViewModel;
-            CloudAgents = cloudAgentsViewModel;
+            ProofRequests = proofRequestsViewModel;
             CreateInvitation = createInvitationViewModel;
         }
 
@@ -38,7 +39,7 @@ namespace Osma.Mobile.App.ViewModels
         {
             await Connections.InitializeAsync(null);
             await Credentials.InitializeAsync(null);
-            await CloudAgents.InitializeAsync(null);
+            await ProofRequests.InitializeAsync(null);
             await Account.InitializeAsync(null);
             await CreateInvitation.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
@@ -66,11 +67,11 @@ namespace Osma.Mobile.App.ViewModels
             set => this.RaiseAndSetIfChanged(ref _account, value);
         }
 
-        private CloudAgentsViewModel _cloudAgents;
-        public CloudAgentsViewModel CloudAgents
+        private ProofRequestsViewModel _proofRequests;
+        public ProofRequestsViewModel ProofRequests
         {
-            get => _cloudAgents;
-            set => this.RaiseAndSetIfChanged(ref _cloudAgents, value);
+            get => _proofRequests;
+            set => this.RaiseAndSetIfChanged(ref _proofRequests, value);
         }
 
         private CreateInvitationViewModel _createInvitation;
