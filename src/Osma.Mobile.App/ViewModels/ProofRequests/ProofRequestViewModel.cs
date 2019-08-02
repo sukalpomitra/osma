@@ -48,6 +48,18 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             JObject requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
             ProofName = requestJson["name"]?.ToString();
             ProofVersion = "Version - " + requestJson["version"]?.ToString();
+            ProofState = _proof.State.ToString();
+
+            JObject attributes = (JObject)requestJson["requested_attributes"];
+            List<string> keys = attributes?.Properties().Select(p => p.Name).ToList();
+            Attributes = keys
+              .Select(k =>
+                  new ProofAttribute()
+                  {
+                      Name = attributes[k]["name"]?.ToString(),
+                      Type = "Text"
+                  })
+             .ToList();
         }
 
         private async Task AcceptProofRequest()
