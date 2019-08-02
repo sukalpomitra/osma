@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using AgentFramework.Core.Contracts;
 using Osma.Mobile.App.Services.Interfaces;
-using Osma.Mobile.App.ViewModels.Account;
 using ReactiveUI;
 using Xamarin.Forms;
-using ZXing.Net.Mobile.Forms;
 using AgentFramework.Core.Extensions;
 
 namespace Osma.Mobile.App.ViewModels.CreateInvitation
@@ -45,39 +42,15 @@ namespace Osma.Mobile.App.ViewModels.CreateInvitation
                 var context = await _agentContextProvider.GetContextAsync();
                 var (invitation, _) = await _connectionService.CreateInvitationAsync(context);
 
-                DialogService.Alert("Creating Invitation ..."); 
-
-                string barcodeValue = invitation.ServiceEndpoint + "?c_i=" + (invitation.ToJson().ToBase64());
-                QrCodeValue = barcodeValue;
+                QrCodeValue = invitation.ServiceEndpoint + "?c_i=" + (invitation.ToJson().ToBase64());
             }
             catch (Exception ex)
             {
-                DialogService.Alert(ex.Message);
+                await DialogService.AlertAsync(ex.Message);
             }
         }
 
-        private ZXingBarcodeImageView QRCodeGenerator(String barcodeValue)
-        {
-            var barcode = new ZXingBarcodeImageView
-            {
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                AutomationId = "zxingBarcodeImageView",
-            };
-
-            barcode.BarcodeFormat = ZXing.BarcodeFormat.QR_CODE;
-            barcode.BarcodeOptions.Width = 300;
-            barcode.BarcodeOptions.Height = 300;
-            barcode.BarcodeOptions.Margin = 10;
-            barcode.BarcodeValue = barcodeValue;
-
-            return barcode;
-
-        }
-
         #region Bindable Command
-
-        public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
 
         public ICommand CreateInvitationCommand => new Command(async () => await CreateInvitation());
 

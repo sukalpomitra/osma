@@ -13,8 +13,6 @@ using AgentFramework.Core.Messages;
 using AgentFramework.Core.Utils;
 using AgentFramework.Core.Messages.Connections;
 using Osma.Mobile.App.Services;
-using Osma.Mobile.App.ViewModels.CreateInvitation;
-using Osma.Mobile.App.ViewModels.Account;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.Extensions;
 using System.Linq;
@@ -79,13 +77,9 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             var context = await _agentContextProvider.GetContextAsync();
             var agent = await _agentContextProvider.GetAgentAsync();
             var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-
-            IList<CloudAgentViewModel> cloudAgentVms = new List<CloudAgentViewModel>();
-            foreach (var record in records)
-            {
-                var cloudAgent = _scope.Resolve<CloudAgentViewModel>(new NamedParameter("record", record));
-                cloudAgentVms.Add(cloudAgent);
-            }
+            var cloudAgentVms = records
+                .Select(r => _scope.Resolve<CloudAgentViewModel>(new NamedParameter("record", r)))
+                .ToList();
 
             CloudAgentsGrouped.Clear();
             CloudAgentsGrouped.InsertRange(cloudAgentVms);
@@ -101,8 +95,10 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
                         await agent.ProcessAsync(context, message);
                     }
                 }
-                catch (Exception ex) {
-                    //DialogService.Alert(ex.Message);
+                catch (Exception)
+                {
+                    // ignored
+                    // DialogService.Alert(ex.Message);
                 }
             }
             
@@ -154,28 +150,26 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
                 });
             };
 
-            await NavigationService.NavigateToAsync((Page)scannerPage, NavigationType.Modal);
+            await NavigationService.NavigateToAsync(scannerPage, NavigationType.Modal);
         }
 
         public async Task SelectCloudAgent(CloudAgentViewModel cloudAgent) => await NavigationService.NavigateToAsync(cloudAgent);
 
         #region Bindable Command
+
         public ICommand RefreshCommand => new Command(async () => await RefreshCloudAgents());
 
         public ICommand ScanInviteCommand => new Command(async () => await ScanInvite());
 
-        public ICommand CreateInvitationCommand => new Command(async () => await NavigationService.NavigateToAsync<CreateInvitationViewModel>());
-
-        public ICommand CheckAccountCommand => new Command(async () => await NavigationService.NavigateToAsync<AccountViewModel>());
-
         public ICommand SelectCloudAgentCommand => new Command<CloudAgentViewModel>(async (cloudAgent) =>
         {
-            if (cloudAgent != null)
-                await SelectCloudAgent(cloudAgent);
+            if (cloudAgent != null) await SelectCloudAgent(cloudAgent);
         });
+
         #endregion
 
         #region Bindable Properties
+
         private RangeEnabledObservableCollection<CloudAgentViewModel> _cloudAgents = new RangeEnabledObservableCollection<CloudAgentViewModel>();
         public RangeEnabledObservableCollection<CloudAgentViewModel> CloudAgentsGrouped
         {
@@ -196,6 +190,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             get => _hasCloudAgents;
             set => this.RaiseAndSetIfChanged(ref _hasCloudAgents, value);
         }
+
         #endregion
     }
 }

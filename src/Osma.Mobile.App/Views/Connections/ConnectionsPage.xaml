@@ -17,8 +17,9 @@
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
         <ToolbarItem Name="Add Connection" Order="Primary" Text="Connect" Priority="0" Command ="{Binding ScanInviteCommand}"/>
-        <ToolbarItem Name="AccountInformation" Order="Secondary" Text="Account Information" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CheckAccountCommand}"/>
-        <ToolbarItem Name="CreateInvitation" Order="Secondary" Text="Create Invitation" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CreateInvitationCommand}"/>
+        <ToolbarItem Name="Account Information" Order="Secondary" Text="Account Information" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CheckAccountCommand}"/>
+        <ToolbarItem Name="Create Invitation" Order="Secondary" Text="Create Invitation" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CreateInvitationCommand}"/>
+        <ToolbarItem Name="Cloud Agents" Order="Secondary" Text="Cloud Agents" ios:NavigationPage.PrefersLargeTitles="true" Priority="0" Command ="{Binding CloudAgentsCommand}"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>

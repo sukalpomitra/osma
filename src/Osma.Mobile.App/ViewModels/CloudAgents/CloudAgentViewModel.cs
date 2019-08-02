@@ -32,8 +32,8 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             _agentContextProvider = agentContextProvider;
             _eventAggregator = eventAggregator;
             _registrationService = registrationService;
-
             _record = record;
+
             CloudAgentLabel = _record.Label;
             TheirVK = _record.TheirVk;
             CloudAgentName = _record.GetType().Name;
@@ -46,6 +46,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         }
 
         #region Bindable Command
+
         public ICommand NavigateBackCommand => new Command(async () =>
         {
             await NavigationService.NavigateBackAsync();
@@ -53,18 +54,10 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
 
         public ICommand DeleteCloudAgentCommand => new Command(async () =>
         {
-            var dialog = DialogService.Loading("Deleting ...");
-
             var context = await _agentContextProvider.GetContextAsync();
             await _registrationService.removeCloudAgentAsync(context.Wallet, _record.Id);
 
             _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CloudAgentsUpdated });
-
-            if (dialog.IsShowing)
-            {
-                dialog.Hide();
-                dialog.Dispose();
-            }
 
             await NavigationService.NavigateBackAsync();
         });
@@ -72,6 +65,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         #endregion
 
         #region Bindable Properties
+
         private string _cloudAgentName;
         public string CloudAgentName
         {
@@ -102,6 +96,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             get => _theirVk;
             set => this.RaiseAndSetIfChanged(ref _theirVk, value);
         }
+
         #endregion
     }
 }
