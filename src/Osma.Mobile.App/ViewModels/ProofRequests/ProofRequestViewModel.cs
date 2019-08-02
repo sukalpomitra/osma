@@ -52,6 +52,19 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task AcceptProofRequest()
         {
+            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            {
+                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+                await NavigationService.PopModalAsync();
+                return;
+            }
+            var proofRequest = JObject.Parse(_proof.RequestJson);
+            JObject values = (JObject)proofRequest["requested_attributes"];
+            var context = await _agentContextProvider.GetContextAsync();
+            //var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id)
+            //_ = await _messageService.SendAsync(context.Wallet, msg, rec);
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
             // TODO: proof request accept logic
             await NavigationService.PopModalAsync();
         }
