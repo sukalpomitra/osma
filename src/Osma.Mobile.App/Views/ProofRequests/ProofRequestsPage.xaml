@@ -19,14 +19,14 @@
                 Text="{Binding SearchTerm}"
                 Placeholder="Search Proofs"
                 BackgroundColor="Transparent" />
-            <Label Text="{Binding ProofCount}"></Label>
+            <Label Text="{Binding ProofRequestsCount}"></Label>
             <ListView
                 HasUnevenRows="true"
                 IsPullToRefreshEnabled="true"
-                IsRefreshing="{Binding RefreshingProofs}"
+                IsRefreshing="{Binding RefreshingProofRequests}"
                 RefreshCommand="{Binding RefreshCommand}"
-                IsEnabled="{Binding RefreshingProofs, Converter={StaticResource BooleanInverse}}"
-                ItemsSource="{Binding ProofsGrouped}"
+                IsEnabled="{Binding RefreshingProofRequests, Converter={StaticResource BooleanInverse}}"
+                ItemsSource="{Binding ProofRequestsGrouped}"
                 IsGroupingEnabled="true"
                 GroupDisplayBinding="{Binding Key}"
                 GroupShortNameBinding="{Binding Key}"
@@ -34,19 +34,14 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <components:DetailedCell
-                            Title="{Binding CredentialName}"
-                            Subtitle="{Binding CredentialSubtitle}"
+                            Title="{Binding ProofName}"
+                            Subtitle="{Binding ProofVersion}"
                         />
                     </DataTemplate>
-                    <!--<DataTemplate>
-                        <components:DetailedCell
-                            Title="{Binding CredentialName}"
-                            Subtitle="{Binding CredentialSubtitle}"
-                            ImageURL="{Binding CredentialImageUrl}"
-                            IsNew="{Binding IsNew}"
-                        />
-                    </DataTemplate>-->
                 </ListView.ItemTemplate>
+                <ListView.Behaviors>
+                    <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectProofRequestCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true"/>
+                </ListView.Behaviors>
             </ListView>
         </StackLayout>
     </ContentPage.Content>

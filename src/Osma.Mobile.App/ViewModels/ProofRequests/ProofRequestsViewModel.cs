@@ -57,53 +57,79 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         public async Task RefreshProofs()
         {
-            RefreshingProofs = true;
+            RefreshingProofRequests = true;
 
             var context = await _agentContextProvider.GetContextAsync();
             var proofRecords = await _proofService.ListAsync(context);
-            ProofCount = "we have number of records:" + proofRecords.Count;
 
-            //IList<CredentialViewModel> credentialsVms = new List<CredentialViewModel>();
-            //foreach (var credentialRecord in proofRecords)
-            //{
-            //    CredentialViewModel credential = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", credentialRecord));
-            //    credentialsVms.Add(credential);
-            //}
+            var proofsVms = proofRecords
+                .Select(p => _scope.Resolve<ProofRequestViewModel>(new NamedParameter("proof", p)))
+                .ToList();
 
-            //var filteredCredentialVms = FilterCredentials(SearchTerm, credentialsVms);
-            //var groupedVms = GroupCredentials(filteredCredentialVms);
-            //CredentialsGrouped = groupedVms;
+            var filteredProofVms = FilterProofRequests(SearchTerm, proofsVms);
+            var groupedVms = GroupProofRequests(filteredProofVms);
 
-            //Credentials.Clear();
-            //Credentials.InsertRange(filteredCredentialVms);
+            ProofRequestsGrouped = groupedVms;
+            ProofRequestsCount = "we have number of records:" + proofRecords.Count;
+            HasProofRequests = ProofRequests.Any();
 
-            //HasProofs = Credentials.Any();
-            HasProofs = true;
-            RefreshingProofs = false;
-            ProofsGrouped = proofRecords;
+            ProofRequests.Clear();
+            ProofRequests.InsertRange(filteredProofVms);
 
+            RefreshingProofRequests = false;
+        }
+
+        public async Task SelectProofRequest(ProofRequestViewModel proof) => await NavigationService.NavigateToAsync(proof, null, NavigationType.Modal);
+
+        private IEnumerable<ProofRequestViewModel> FilterProofRequests(string term, IEnumerable<ProofRequestViewModel> proofs)
+        {
+            if (string.IsNullOrWhiteSpace(term)) return proofs;
+            return proofs.Where(proofRequestViewModel => proofRequestViewModel.ProofName.Contains(term));
+        }
+
+        private IEnumerable<Grouping<string, ProofRequestViewModel>> GroupProofRequests(IEnumerable<ProofRequestViewModel> proofRequestsViewModels)
+        {
+            return proofRequestsViewModels
+                .OrderBy(proofRequestsViewModel => proofRequestsViewModel.ProofName)
+                .GroupBy(proofRequestsViewModel => {
+                    if (string.IsNullOrWhiteSpace(proofRequestsViewModel.ProofName)) return "*";
+                    return proofRequestsViewModel.ProofName[0].ToString().ToUpperInvariant();
+                }) // TODO check proofRequestName
+                .Select(group => {
+                    return new Grouping<string, ProofRequestViewModel>(group.Key, group.ToList());
+                });
         }
 
         #region Bindable Command
-        
+        public ICommand SelectProofRequestCommand => new Command<ProofRequestViewModel>(async (proofs) =>
+        {
+            if (proofs != null) await SelectProofRequest(proofs);
+        });
+
         public ICommand RefreshCommand => new Command(async () => await RefreshProofs());
 
         #endregion
 
         #region Bindable Properties
-      
-        private bool _hasCredentials;
-        public bool HasProofs
+        private RangeEnabledObservableCollection<ProofRequestViewModel> _proofRequests = new RangeEnabledObservableCollection<ProofRequestViewModel>();
+        public RangeEnabledObservableCollection<ProofRequestViewModel> ProofRequests
         {
-            get => _hasCredentials;
-            set => this.RaiseAndSetIfChanged(ref _hasCredentials, value);
+            get => _proofRequests;
+            set => this.RaiseAndSetIfChanged(ref _proofRequests, value);
         }
 
-        private bool _refreshingCredentials;
-        public bool RefreshingProofs
+        private bool _hasProofRequests;
+        public bool HasProofRequests
         {
-            get => _refreshingCredentials;
-            set => this.RaiseAndSetIfChanged(ref _refreshingCredentials, value);
+            get => _hasProofRequests;
+            set => this.RaiseAndSetIfChanged(ref _hasProofRequests, value);
+        }
+
+        private bool _refreshingProofRequests;
+        public bool RefreshingProofRequests
+        {
+            get => _refreshingProofRequests;
+            set => this.RaiseAndSetIfChanged(ref _refreshingProofRequests, value);
         }
 
         private string _searchTerm;
@@ -113,22 +139,19 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             set => this.RaiseAndSetIfChanged(ref _searchTerm, value);
         }
 
-        private List<ProofRecord> _proofsGrouped;
-
-        public List<ProofRecord> ProofsGrouped
+        private IEnumerable<Grouping<string, ProofRequestViewModel>> _proofRequestsGrouped;
+        public IEnumerable<Grouping<string, ProofRequestViewModel>> ProofRequestsGrouped
         {
-            get => _proofsGrouped;
-            set => this.RaiseAndSetIfChanged(ref _proofsGrouped, value);
+            get => _proofRequestsGrouped;
+            set => this.RaiseAndSetIfChanged(ref _proofRequestsGrouped, value);
         }
 
-        private String _proofCount;
-
-        public String ProofCount
+        private string _proofRequestsCount;
+        public string ProofRequestsCount
         {
-            get => _proofCount;
-            set => this.RaiseAndSetIfChanged(ref _proofCount, value);
+            get => _proofRequestsCount;
+            set => this.RaiseAndSetIfChanged(ref _proofRequestsCount, value);
         }
-
 
         #endregion
     }

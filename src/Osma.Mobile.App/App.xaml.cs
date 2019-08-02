@@ -66,6 +66,7 @@ namespace Osma.Mobile.App
             _navigationService.AddPageViewModelBinding<CloudAgentsViewModel, CloudAgentsPage>();
             _navigationService.AddPageViewModelBinding<CloudAgentViewModel, CloudAgentPage>();
             _navigationService.AddPageViewModelBinding<ProofRequestsViewModel, ProofRequestsPage>();
+            _navigationService.AddPageViewModelBinding<ProofRequestViewModel, ProofRequestPage>();
 
             if (_contextProvider.AgentExists())
             {

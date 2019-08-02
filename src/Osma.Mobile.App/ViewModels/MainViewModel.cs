@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.ViewModels.Account;
@@ -21,6 +20,7 @@ namespace Osma.Mobile.App.ViewModels
             CredentialsViewModel credentialsViewModel,
             AccountViewModel accountViewModel,
             ProofRequestsViewModel proofRequestsViewModel,
+            CloudAgentsViewModel cloudAgentsViewModel,
             CreateInvitationViewModel createInvitationViewModel
         ) : base(
                 nameof(MainViewModel),
@@ -33,6 +33,7 @@ namespace Osma.Mobile.App.ViewModels
             Account = accountViewModel;
             ProofRequests = proofRequestsViewModel;
             CreateInvitation = createInvitationViewModel;
+            CloudAgents = cloudAgentsViewModel;
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -42,10 +43,12 @@ namespace Osma.Mobile.App.ViewModels
             await ProofRequests.InitializeAsync(null);
             await Account.InitializeAsync(null);
             await CreateInvitation.InitializeAsync(null);
+            await CloudAgents.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
         }
 
         #region Bindable Properties
+
         private ConnectionsViewModel _connections;
         public ConnectionsViewModel Connections
         {
@@ -72,6 +75,13 @@ namespace Osma.Mobile.App.ViewModels
         {
             get => _proofRequests;
             set => this.RaiseAndSetIfChanged(ref _proofRequests, value);
+        }
+
+        private CloudAgentsViewModel _cloudAgents;
+        public CloudAgentsViewModel CloudAgents
+        {
+            get => _cloudAgents;
+            set => this.RaiseAndSetIfChanged(ref _cloudAgents, value);
         }
 
         private CreateInvitationViewModel _createInvitation;

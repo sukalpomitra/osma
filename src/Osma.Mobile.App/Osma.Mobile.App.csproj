@@ -103,6 +103,9 @@
     <Compile Update="Views\Components\DetailedCell.xaml.cs">
       <DependentUpon>DetailedCell.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\ProofRequests\ProofRequestPage.xaml.cs">
+      <DependentUpon>ProofRequestPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Update="App.xaml">
