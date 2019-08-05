@@ -27,8 +27,10 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly IEventAggregator _eventAggregator;
         private readonly ICredentialService _credentialService;
 
+        private JObject _requestedAttributes;
         private IDictionary<string, bool> _proofAttributes = new Dictionary<string, bool>();
         private IDictionary<string, bool> _previousProofAttribute = new Dictionary<string, bool>();
+        private IDictionary<string, RequestedAttribute> _requestedAttributesMap = new Dictionary<string, RequestedAttribute>();
 
         public ProofRequestViewModel(
             IUserDialogs userDialogs,
@@ -57,13 +59,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             ProofVersion = "Version - " + requestJson["version"]?.ToString();
             ProofState = _proof.State.ToString();
 
-            JObject attributes = (JObject)requestJson["requested_attributes"];
-            List<string> keys = attributes?.Properties().Select(p => p.Name).ToList();
+            _requestedAttributes = (JObject)requestJson["requested_attributes"];
+            List<string> keys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
             Attributes = keys
               .Select(k =>
                   new ProofAttribute()
                   {
-                      Name = attributes[k]["name"]?.ToString(),
+                      Name = _requestedAttributes[k]["name"]?.ToString(),
                       Type = "Text"
                   })
              .ToList();
@@ -125,10 +127,29 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
             if (!IsFrameVisible) return;
 
+            await FilterCredentialRecords(proofAttribute.Name);
+        }
+
+        private async Task FilterCredentialRecords(string name)
+        {
             var context = await _agentContextProvider.GetContextAsync();
             var credentialsRecords = await _credentialService.ListAsync(context);
 
-            ProofCredentials = credentialsRecords;
+            IList<JObject> restrictions = new List<JObject>();
+            IList<string> credentialDefinitionIds = new List<string>();
+            IList<string> keys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
+
+            string attributeName = keys
+                .Where(k => _requestedAttributes[k]["name"]?.ToString() == name)
+                .SingleOrDefault();
+            restrictions = _requestedAttributes[attributeName]["restrictions"]?.ToObject<List<JObject>>();
+            credentialDefinitionIds = restrictions
+                .Select(r => r["credential_definition_id"]?.ToString())
+                .ToList();
+
+            ProofCredentials = credentialsRecords
+                .Where(cr => cr.State == CredentialState.Issued && credentialDefinitionIds.Contains(cr.CredentialDefinitionId))
+                .ToList();
         }
 
         private async Task RejectProofRequest()
