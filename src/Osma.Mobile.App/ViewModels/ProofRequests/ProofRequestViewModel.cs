@@ -14,6 +14,8 @@ using Osma.Mobile.App.ViewModels.ProofRequests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AgentFramework.Core.Models.Proofs;
+using Xamarin.Forms.Internals;
+using System.Reactive.Linq;
 
 namespace Osma.Mobile.App.ViewModels.ProofRequests
 {
@@ -30,7 +32,8 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private JObject _requestedAttributes;
         private IDictionary<string, bool> _proofAttributes = new Dictionary<string, bool>();
         private IDictionary<string, bool> _previousProofAttribute = new Dictionary<string, bool>();
-        private IDictionary<string, RequestedAttribute> _requestedAttributesMap = new Dictionary<string, RequestedAttribute>();
+        private Dictionary<string, RequestedAttribute> _requestedAttributesMap = new Dictionary<string, RequestedAttribute>();
+        private IList<string> _requestedAtrributesKeys = new List<string>();
 
         public ProofRequestViewModel(
             IUserDialogs userDialogs,
@@ -55,27 +58,42 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _eventAggregator = eventAggregator;
 
             JObject requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
+
             ProofName = requestJson["name"]?.ToString();
             ProofVersion = "Version - " + requestJson["version"]?.ToString();
             ProofState = _proof.State.ToString();
 
             _requestedAttributes = (JObject)requestJson["requested_attributes"];
-            List<string> keys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
-            Attributes = keys
-              .Select(k =>
-                  new ProofAttribute()
-                  {
-                      Name = _requestedAttributes[k]["name"]?.ToString(),
-                      Type = "Text"
-                  })
-             .ToList();
+            _requestedAtrributesKeys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
 
-            IsFrameVisible = false;
+            Attributes = _requestedAtrributesKeys
+                .Select(k =>
+                 new ProofAttribute()
+                 {
+                     Name = _requestedAttributes[k]["name"]?.ToString(),
+                     Type = "Text"
+                 })
+                 .ToList();
         }
 
         public override async Task InitializeAsync(object navigationData)
         {
+            RefreshProofRequest();
+
+            _ = _eventAggregator.GetEventByType<ApplicationEvent>()
+                            .Where(_ => _.Type == ApplicationEventType.ProofRequestAtrributeUpdated)
+                            .Subscribe(_ => RefreshProofRequest());
+
             await base.InitializeAsync(navigationData);
+        }
+
+        public void RefreshProofRequest()
+        {
+            RefreshingProofRequest = true;
+
+            IsFrameVisible = false;
+
+            RefreshingProofRequest = false;
         }
 
         private async Task AcceptProofRequest()
@@ -83,30 +101,44 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
             {
                 await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
-                await NavigationService.PopModalAsync();
                 return;
             }
 
-            RequestedAttribute requestedAttribute = new RequestedAttribute();
-            requestedAttribute.CredentialId = "8d1e9b21-0844-424f-9beb-a9e8028f906b";
-            requestedAttribute.Revealed = true;
-            requestedAttribute.Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
-            Dictionary<String, RequestedAttribute> map = new Dictionary<string, RequestedAttribute>();
-            map.Add("2e8b99a1-3e70-4899-8542-f39c9b4aeb85", requestedAttribute);
-            map.Add("2e63bcbe-c0c6-4915-934b-9ea4b0341cea", requestedAttribute);
-            RequestedCredentials requestedCredentials = new RequestedCredentials();
-            requestedCredentials.RequestedAttributes = map;
+            if (_requestedAttributesMap.Keys.Count != _requestedAtrributesKeys.Count)
+            {
+                await DialogService.AlertAsync("Some proof attributes are missing");
+                return;
+            } 
+
+            RequestedCredentials requestedCredentials = new RequestedCredentials
+            {
+                RequestedAttributes = _requestedAttributesMap
+            };
+
             var context = await _agentContextProvider.GetContextAsync();
             var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
-            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
 
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
-            // TODO: proof request accept logic
+            try
+            {
+                _ = await _messageService.SendAsync(context.Wallet, msg, rec);
+            }
+            catch (Exception ex)
+            {
+                DialogService.Alert(ex.Message);
+            }
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ProofRequestUpdated });
+
             await NavigationService.PopModalAsync();
         }
 
         private async Task LoadProofCredentials(ProofAttribute proofAttribute)
         {
+            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            {
+                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+                return;
+            }
             if (_previousProofAttribute.Any() && !_previousProofAttribute.ContainsKey(proofAttribute.Name))
                 _proofAttributes[_previousProofAttribute.Keys.Single()] = false;
 
@@ -130,6 +162,40 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             await FilterCredentialRecords(proofAttribute.Name);
         }
 
+        private void BuildRequestedAttributesMap(CredentialRecord proofCredential)
+        {
+            IsFrameVisible = false;
+            _proofAttributes[_previousProofAttribute.Keys.Single()] = false;
+
+            RequestedAttribute requestedAttribute = new RequestedAttribute()
+            {
+                CredentialId = proofCredential.CredentialId,
+                Revealed = true,
+                Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds()
+            };
+            string attributeName = _requestedAtrributesKeys
+                .Where(k => _requestedAttributes[k]["name"]?.ToString() == _previousProofAttribute.Keys.Single())
+                .SingleOrDefault();
+
+            Attributes
+                .ForEach(a => 
+                {
+                    if (a.Name == _requestedAttributes[attributeName]["name"]?.ToString())
+                        a.Value = proofCredential.SchemaId;
+                });
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ProofRequestAtrributeUpdated });
+
+            if (_requestedAttributesMap.ContainsKey(attributeName))
+            {
+                if (_requestedAttributesMap[attributeName]?.CredentialId != requestedAttribute.CredentialId)
+                    _requestedAttributesMap[attributeName] = requestedAttribute;
+                return;
+            }
+
+            _requestedAttributesMap.Add(attributeName, requestedAttribute);
+        }
+
         private async Task FilterCredentialRecords(string name)
         {
             var context = await _agentContextProvider.GetContextAsync();
@@ -137,9 +203,8 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
             IList<JObject> restrictions = new List<JObject>();
             IList<string> credentialDefinitionIds = new List<string>();
-            IList<string> keys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
 
-            string attributeName = keys
+            string attributeName = _requestedAtrributesKeys
                 .Where(k => _requestedAttributes[k]["name"]?.ToString() == name)
                 .SingleOrDefault();
             restrictions = _requestedAttributes[attributeName]["restrictions"]?.ToObject<List<JObject>>();
@@ -170,6 +235,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             if (proofAttribute != null) await LoadProofCredentials(proofAttribute);
         });
+
+        public ICommand SelectProofCredentialCommand => new Command<CredentialRecord>(proofCredential =>
+        {
+            if (proofCredential != null) BuildRequestedAttributesMap(proofCredential);
+        });
+
+        public ICommand RefreshCommand => new Command(_ => RefreshProofRequest());
 
         #endregion
 
@@ -215,6 +287,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             get => _proofCredentials;
             set => this.RaiseAndSetIfChanged(ref _proofCredentials, value);
+        }
+
+        private bool _refreshingProofRequest;
+        public bool RefreshingProofRequest
+        {
+            get => _refreshingProofRequest;
+            set => this.RaiseAndSetIfChanged(ref _refreshingProofRequest, value);
         }
 
         #endregion

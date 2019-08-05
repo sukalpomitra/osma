@@ -233,7 +233,11 @@
                     BackgroundColor="#eee"
                     ItemTemplate="{StaticResource proofRequestAttributeTemplateSelector}"
                     ItemsSource="{Binding Attributes}"
-                    HasUnevenRows="true">
+                    HasUnevenRows="true"
+                    IsPullToRefreshEnabled="true"
+                    IsRefreshing="{Binding RefreshingProofRequest}"
+                    RefreshCommand="{Binding RefreshCommand}"
+                    IsEnabled="{Binding RefreshingProofRequest, Converter={StaticResource BooleanInverse}}">
                     <ListView.Behaviors>
                         <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectProofAttributeCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true"/>
                     </ListView.Behaviors>
@@ -253,6 +257,9 @@
                     ItemTemplate="{StaticResource proofRequestCredentialTemplateSelector}"
                     ItemsSource="{Binding ProofCredentials}"
                     HasUnevenRows="true">
+                                <ListView.Behaviors>
+                                    <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectProofCredentialCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true"/>
+                                </ListView.Behaviors>
                             </ListView>
                         </StackLayout>
                     </Frame>
