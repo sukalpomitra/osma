@@ -67,7 +67,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             var credentialsRecords = await _credentialService.ListAsync(context);
 
             credentialsRecords = credentialsRecords
-                .Where(c => c.State == CredentialState.Offered || c.State == CredentialState.Issued)
+                .Where(c => c.State != CredentialState.Rejected || c.State == CredentialState.Revoked)
                 .ToList();
 
             var credentialsVms = credentialsRecords
