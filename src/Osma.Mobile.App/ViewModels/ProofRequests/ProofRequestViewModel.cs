@@ -13,6 +13,7 @@ using Osma.Mobile.App.Events;
 using Osma.Mobile.App.ViewModels.ProofRequests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using AgentFramework.Core.Models.Proofs;
 
 namespace Osma.Mobile.App.ViewModels.ProofRequests
 {
@@ -70,11 +71,19 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                 await NavigationService.PopModalAsync();
                 return;
             }
-            var proofRequest = JObject.Parse(_proof.RequestJson);
-            JObject values = (JObject)proofRequest["requested_attributes"];
+
+            RequestedAttribute requestedAttribute = new RequestedAttribute();
+            requestedAttribute.CredentialId = "8d1e9b21-0844-424f-9beb-a9e8028f906b";
+            requestedAttribute.Revealed = true;
+            requestedAttribute.Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
+            Dictionary<String, RequestedAttribute> map = new Dictionary<string, RequestedAttribute>();
+            map.Add("2e8b99a1-3e70-4899-8542-f39c9b4aeb85", requestedAttribute);
+            map.Add("2e63bcbe-c0c6-4915-934b-9ea4b0341cea", requestedAttribute);
+            RequestedCredentials requestedCredentials = new RequestedCredentials();
+            requestedCredentials.RequestedAttributes = map;
             var context = await _agentContextProvider.GetContextAsync();
-            //var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id)
-            //_ = await _messageService.SendAsync(context.Wallet, msg, rec);
+            var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
+            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
 
             _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
             // TODO: proof request accept logic
