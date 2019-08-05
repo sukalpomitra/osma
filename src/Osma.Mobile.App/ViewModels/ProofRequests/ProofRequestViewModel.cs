@@ -24,6 +24,10 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly IMessageService _messageService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly ICredentialService _credentialService;
+
+        private IDictionary<string, bool> _proofAttributes = new Dictionary<string, bool>();
+        private IDictionary<string, bool> _previousProofAttribute = new Dictionary<string, bool>();
 
         public ProofRequestViewModel(
             IUserDialogs userDialogs,
@@ -31,6 +35,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             IProofService proofService,
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
+            ICredentialService credentialService,
             IEventAggregator eventAggregator,
             ProofRecord proof
         ) : base(
@@ -43,6 +48,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _proofService = proofService;
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
+            _credentialService = credentialService;
             _eventAggregator = eventAggregator;
 
             JObject requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
@@ -60,12 +66,47 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                       Type = "Text"
                   })
              .ToList();
+
+            IsFrameVisible = false;
+        }
+
+        public override async Task InitializeAsync(object navigationData)
+        {
+            await base.InitializeAsync(navigationData);
         }
 
         private async Task AcceptProofRequest()
         {
             // TODO: proof request accept logic
             await NavigationService.PopModalAsync();
+        }
+
+        private async Task LoadProofCredentials(ProofAttribute proofAttribute)
+        {
+            if (_previousProofAttribute.Any() && !_previousProofAttribute.ContainsKey(proofAttribute.Name))
+                _proofAttributes[_previousProofAttribute.Keys.Single()] = false;
+
+            if (!_proofAttributes.ContainsKey(proofAttribute.Name))
+            {
+                _proofAttributes.Add(proofAttribute.Name, true);
+                _previousProofAttribute = new Dictionary<string, bool> { { proofAttribute.Name, true } };
+
+                IsFrameVisible = true;
+            }
+            else
+            {
+                _proofAttributes[proofAttribute.Name] = !_proofAttributes[proofAttribute.Name];
+                _previousProofAttribute = new Dictionary<string, bool> { { proofAttribute.Name, _proofAttributes[proofAttribute.Name] } };
+
+                IsFrameVisible = _proofAttributes[proofAttribute.Name];
+            }
+
+            if (!IsFrameVisible) return;
+
+            var context = await _agentContextProvider.GetContextAsync();
+            var credentialsRecords = await _credentialService.ListAsync(context);
+
+            ProofCredentials = credentialsRecords;
         }
 
         private async Task RejectProofRequest()
@@ -81,6 +122,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         public ICommand AcceptProofRequestCommand => new Command(async () => await AcceptProofRequest());
 
         public ICommand RejectProofRequestCommand => new Command(async () => await RejectProofRequest());
+
+        public ICommand SelectProofAttributeCommand => new Command<ProofAttribute>(async (proofAttribute) =>
+        {
+            if (proofAttribute != null) await LoadProofCredentials(proofAttribute);
+        });
 
         #endregion
 
@@ -107,11 +153,25 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             set => this.RaiseAndSetIfChanged(ref _proofVersion, value);
         }
 
+        private bool _isFrameVisible;
+        public bool IsFrameVisible
+        {
+            get => _isFrameVisible;
+            set => this.RaiseAndSetIfChanged(ref _isFrameVisible, value);
+        }
+
         private IEnumerable<ProofAttribute> _attributes;
         public IEnumerable<ProofAttribute> Attributes
         {
             get => _attributes;
             set => this.RaiseAndSetIfChanged(ref _attributes, value);
+        }
+
+        private IList<CredentialRecord> _proofCredentials;
+        public IList<CredentialRecord> ProofCredentials
+        {
+            get => _proofCredentials;
+            set => this.RaiseAndSetIfChanged(ref _proofCredentials, value);
         }
 
         #endregion

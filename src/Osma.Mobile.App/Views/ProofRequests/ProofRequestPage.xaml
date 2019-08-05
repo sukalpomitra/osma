@@ -6,12 +6,16 @@
     xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
     xmlns:views="clr-namespace:Osma.Mobile.App.Views.ProofRequests;assembly=Osma.Mobile.App"
     xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+    xmlns:behaviours="clr-namespace:Osma.Mobile.App.Behaviors"
+    xmlns:converters="clr-namespace:Osma.Mobile.App.Converters"
     x:Class="Osma.Mobile.App.Views.ProofRequests.ProofRequestPage"
     Title="{Binding ProofName}"
     ios:Page.UseSafeArea="true"
 >
     <ContentPage.Resources>
         <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="BooleanInverse" />
+            <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
             <DataTemplate x:Key="textTemplate">
                 <ViewCell>
                     <StackLayout Padding="24, 16">
@@ -22,6 +26,14 @@
                             Text="{Binding Value}"
                             FontSize="Medium"
                             FontAttributes="Bold" />
+                    </StackLayout>
+                </ViewCell>
+            </DataTemplate>
+            <DataTemplate x:Key="proofCredentialTemplate">
+                <ViewCell>
+                    <StackLayout Padding="24, 16">
+                        <Label 
+                            Text="{Binding SchemaId}"/>
                     </StackLayout>
                 </ViewCell>
             </DataTemplate>
@@ -74,6 +86,10 @@
                 TextTemplate="{StaticResource textTemplate}"
                 FileTemplate="{StaticResource fileTemplate}"
                 ErrorTemplate="{StaticResource errorTemplate}"
+            />
+            <views:ProofRequestCredentialTemplateSelector
+                x:Key="proofRequestCredentialTemplateSelector"
+                TextTemplate="{StaticResource proofCredentialTemplate}"
             />
         </ResourceDictionary>
     </ContentPage.Resources>
@@ -218,7 +234,29 @@
                     ItemTemplate="{StaticResource proofRequestAttributeTemplateSelector}"
                     ItemsSource="{Binding Attributes}"
                     HasUnevenRows="true">
+                    <ListView.Behaviors>
+                        <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectProofAttributeCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true"/>
+                    </ListView.Behaviors>
                 </ListView>
+                <Frame
+                HasShadow="false"
+                BackgroundColor="Transparent"
+                IsVisible="{Binding IsFrameVisible}">
+                    <Frame
+                    HasShadow="true"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start">
+                        <StackLayout>
+                            <ListView
+                    SeparatorVisibility="None"
+                    BackgroundColor="#eee"
+                    ItemTemplate="{StaticResource proofRequestCredentialTemplateSelector}"
+                    ItemsSource="{Binding ProofCredentials}"
+                    HasUnevenRows="true">
+                            </ListView>
+                        </StackLayout>
+                    </Frame>
+                </Frame>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>
