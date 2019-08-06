@@ -29,6 +29,15 @@
                     </StackLayout>
                 </ViewCell>
             </DataTemplate>
+            <DataTemplate x:Key="nameTemplate">
+                <ViewCell>
+                    <StackLayout Padding="24, 16">
+                        <Label 
+                            Text="{Binding Name}"
+                            FontSize="Small" />
+                    </StackLayout>
+                </ViewCell>
+            </DataTemplate>
             <DataTemplate x:Key="proofCredentialTemplate">
                 <ViewCell>
                     <StackLayout Padding="24, 16">
@@ -85,6 +94,7 @@
                 x:Key="proofRequestAttributeTemplateSelector"
                 TextTemplate="{StaticResource textTemplate}"
                 FileTemplate="{StaticResource fileTemplate}"
+                NameTemplate="{StaticResource nameTemplate}"
                 ErrorTemplate="{StaticResource errorTemplate}"
             />
             <views:ProofRequestCredentialTemplateSelector

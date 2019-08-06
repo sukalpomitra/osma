@@ -78,23 +78,23 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         public override async Task InitializeAsync(object navigationData)
         {
-            RefreshProofRequest();
+            //RefreshProofRequest();
 
-            _ = _eventAggregator.GetEventByType<ApplicationEvent>()
-                            .Where(_ => _.Type == ApplicationEventType.ProofRequestAtrributeUpdated)
-                            .Subscribe(_ => RefreshProofRequest());
+            //_ = _eventAggregator.GetEventByType<ApplicationEvent>()
+            //                .Where(_ => _.Type == ApplicationEventType.ProofRequestAtrributeUpdated)
+            //                .Subscribe(_ => RefreshProofRequest());
 
             await base.InitializeAsync(navigationData);
         }
 
-        public void RefreshProofRequest()
-        {
-            RefreshingProofRequest = true;
+        //public void RefreshProofRequest()
+        //{
+        //    RefreshingProofRequest = true;
 
-            IsFrameVisible = false;
+        //    IsFrameVisible = false;
 
-            RefreshingProofRequest = false;
-        }
+        //    RefreshingProofRequest = false;
+        //}
 
         private async Task AcceptProofRequest()
         {
@@ -134,11 +134,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task LoadProofCredentials(ProofAttribute proofAttribute)
         {
-            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
-            {
-                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
-                return;
-            }
+            //if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            //{
+            //    await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+            //    return;
+            //}
             if (_previousProofAttribute.Any() && !_previousProofAttribute.ContainsKey(proofAttribute.Name))
                 _proofAttributes[_previousProofAttribute.Keys.Single()] = false;
 
@@ -241,7 +241,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             if (proofCredential != null) BuildRequestedAttributesMap(proofCredential);
         });
 
-        public ICommand RefreshCommand => new Command(_ => RefreshProofRequest());
+        //public ICommand RefreshCommand => new Command(_ => RefreshProofRequest());
 
         #endregion
 

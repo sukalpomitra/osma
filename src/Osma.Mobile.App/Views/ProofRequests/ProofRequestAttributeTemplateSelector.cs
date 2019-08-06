@@ -9,6 +9,7 @@ namespace Osma.Mobile.App.Views.ProofRequests
         None,
         Text = 1,
         File = 2, 
+        Name = 3
     }
 
     public class ProofRequestAttributeTemplateSelector : DataTemplateSelector
@@ -16,6 +17,7 @@ namespace Osma.Mobile.App.Views.ProofRequests
         public DataTemplate TextTemplate { get; set; }
         public DataTemplate FileTemplate { get; set; }
         public DataTemplate ErrorTemplate { get; set; }
+        public DataTemplate NameTemplate { get; set; }
 
         protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
         {
@@ -37,6 +39,7 @@ namespace Osma.Mobile.App.Views.ProofRequests
             try
             {
                 proofRequestAttributeType = (ProofRequestAttributeType)Enum.Parse(typeof(ProofRequestAttributeType), proofRequestAttribute.Type, true);
+                if (proofRequestAttribute.Value == null) proofRequestAttributeType = ProofRequestAttributeType.Name;
             }
             catch (ArgumentException)
             {
@@ -48,6 +51,8 @@ namespace Osma.Mobile.App.Views.ProofRequests
                     return TextTemplate;
                 case ProofRequestAttributeType.File:
                     return FileTemplate;
+                case ProofRequestAttributeType.Name:
+                    return NameTemplate;
                 default:
                     return ErrorTemplate;
 
