@@ -170,7 +170,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             RequestedAttribute requestedAttribute = new RequestedAttribute()
             {
                 CredentialId = proofCredential.CredentialId,
-                Revealed = true,
+                Revealed = false,
                 Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds()
             };
             string attributeName = _requestedAtrributesKeys
@@ -209,7 +209,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                 .SingleOrDefault();
             restrictions = _requestedAttributes[attributeName]["restrictions"]?.ToObject<List<JObject>>();
             credentialDefinitionIds = restrictions
-                .Select(r => r["credential_definition_id"]?.ToString())
+                .Select(r => r["cred_def_id"]?.ToString())
                 .ToList();
 
             ProofCredentials = credentialsRecords
