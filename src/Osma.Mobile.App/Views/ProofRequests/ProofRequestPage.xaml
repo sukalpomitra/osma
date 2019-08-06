@@ -8,7 +8,9 @@
     xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
     xmlns:behaviours="clr-namespace:Osma.Mobile.App.Behaviors"
     xmlns:converters="clr-namespace:Osma.Mobile.App.Converters"
+    xmlns:components="clr-namespace:Osma.Mobile.App.Views.Components"
     x:Class="Osma.Mobile.App.Views.ProofRequests.ProofRequestPage"
+    x:Name="ProofRequestView"
     Title="{Binding ProofName}"
     ios:Page.UseSafeArea="true"
 >
@@ -16,6 +18,72 @@
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="BooleanInverse" />
             <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
+            <DataTemplate x:Key="detailCell">
+                <ViewCell>
+                    <ViewCell.View>
+                        <Grid Padding="24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                                <RowDefinition Height="Auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <ffimageloading:CachedImage
+                                Grid.Row="0"    
+                                Grid.Column="0"
+                                Grid.RowSpan="2"
+                                VerticalOptions="Center"
+                                HeightRequest="50"
+                                WidthRequest="50"
+                                FadeAnimationEnabled="true"
+                                DownsampleUseDipUnits="true"
+                                Aspect="Fill">
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:CircleTransformation/>
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                VerticalOptions="Center"
+                                FontSize="Medium"
+                                Text="{Binding Name}"
+                            />
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                VerticalOptions="Center"
+                                FontSize="Small"
+                                Text="{Binding Value}"
+                            />
+                            <Label 
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                VerticalOptions="Center"
+                                FontSize="Small"
+                                Text="Reveal Data"
+                            />
+                            <Switch
+                                Grid.Row="1"
+                                Grid.RowSpan="2"
+                                Grid.Column="2"
+                                IsToggled="{Binding IsRevealed}"
+                                VerticalOptions="Center">
+                                <Switch.Behaviors>
+                                    <behaviours:EventToCommandBehavior 
+                                        EventName="Toggled" 
+                                        Command="{Binding Path=BindingContext.ToggledCommand, Source={x:Reference ProofRequestView}}"
+								        CommandParameter="{Binding .}"
+                                    />
+                                </Switch.Behaviors>
+                            </Switch>
+                        </Grid>
+                    </ViewCell.View>
+                </ViewCell>
+            </DataTemplate>
             <DataTemplate x:Key="textTemplate">
                 <ViewCell>
                     <StackLayout Padding="24, 16">
@@ -241,7 +309,7 @@
                 <ListView
                     SeparatorVisibility="None"
                     BackgroundColor="#eee"
-                    ItemTemplate="{StaticResource proofRequestAttributeTemplateSelector}"
+                    ItemTemplate="{StaticResource detailCell}"
                     ItemsSource="{Binding Attributes}"
                     HasUnevenRows="true"
                     IsPullToRefreshEnabled="true"
