@@ -110,7 +110,7 @@
                 <ViewCell>
                     <StackLayout Padding="24, 16">
                         <Label 
-                            Text="{Binding SchemaId}"/>
+                            Text="{Binding Name}"/>
                     </StackLayout>
                 </ViewCell>
             </DataTemplate>
