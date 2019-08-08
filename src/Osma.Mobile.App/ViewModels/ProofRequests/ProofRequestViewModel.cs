@@ -246,7 +246,6 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             var requestedAttribute = new RequestedAttribute
             {
                 CredentialId = proofCredential.CredentialId,
-                Revealed = true,
                 Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds()
             };
             var attributeName = _requestedAttributesKeys
