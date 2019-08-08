@@ -40,8 +40,8 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly Dictionary<string, RequestedAttribute> _requestedAttributesMap = new Dictionary<string, RequestedAttribute>();
         private readonly Dictionary<string, RequestedAttribute> _requestedPredicatesMap = new Dictionary<string, RequestedAttribute>();
 
-        private readonly IList<string> _requestedAtrributesKeys = new List<string>();
-        private readonly IList<string> _requestedPredicatesKeys = new List<string>();
+        private readonly IList<string> _requestedAttributesKeys;
+        private readonly IList<string> _requestedPredicatesKeys;
 
         public ProofRequestViewModel(
             IUserDialogs userDialogs,
@@ -65,42 +65,45 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _credentialService = credentialService;
             _eventAggregator = eventAggregator;
 
-            JObject requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
+            var requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
 
             ProofName = requestJson["name"]?.ToString();
-            ProofVersion = "Version - " + requestJson["version"]?.ToString();
+            ProofVersion = "Version - " + requestJson["version"];
             ProofState = _proof.State.ToString();
 
             _requestedAttributes = (JObject)requestJson["requested_attributes"];
             _requestedPredicates = (JObject)requestJson["requested_predicates"];
 
-            _requestedAtrributesKeys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
+            _requestedAttributesKeys = _requestedAttributes?.Properties().Select(p => p.Name).ToList();
             _requestedPredicatesKeys = _requestedPredicates?.Properties().Select(p => p.Name).ToList();
 
-            Attributes = _requestedAtrributesKeys
-                .Select(k =>
-                 new ProofAttribute()
-                 {
-                     Name = _requestedAttributes[k]["name"]?.ToString(),
-                     Type = "Text",
-                     IsRevealed = true,
-                     IsNotPredicate = true
-                 })
-                 .ToList();
-
-            _requestedPredicatesKeys.ForEach(pk => 
+            if (_requestedAttributesKeys != null)
             {
-                var pa = new ProofAttribute()
-                {
-                    Name = _requestedPredicates[pk]["name"]?.ToString(),
-                    Type = "Text",
-                    IsRevealed = false,
-                    IsNotPredicate = false
-                };
-                Attributes.Add(pa);
-            });
+                Attributes = _requestedAttributesKeys
+                    .Select(k =>
+                        new ProofAttribute
+                        {
+                            Name = _requestedAttributes[k]["name"]?.ToString(),
+                            Type = "Text",
+                            IsRevealed = true,
+                            IsNotPredicate = true
+                        })
+                    .ToList();
 
-           _requestedAtrributesKeys.ForEach(k => _requestedAttributesRevealedMap.Add(k, true));
+                _requestedPredicatesKeys.ForEach(pk =>
+                {
+                    var pa = new ProofAttribute
+                    {
+                        Name = _requestedPredicates[pk]["name"]?.ToString(),
+                        Type = "Text",
+                        IsRevealed = false,
+                        IsNotPredicate = false
+                    };
+                    Attributes.Add(pa);
+                });
+
+                _requestedAttributesKeys.ForEach(k => _requestedAttributesRevealedMap.Add(k, true));
+            }
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -127,20 +130,23 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
             {
-                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+                await DialogService
+                    .AlertAsync("Proof state should be " + 
+                                AgentFramework.Core.Models.Records.ProofState.Requested);
                 return;
             }
 
-            if (_requestedAttributesMap.Keys.Count != _requestedAtrributesKeys.Count)
+            if (_requestedAttributesMap.Keys.Count + _requestedPredicatesMap.Keys.Count != 
+                _requestedAttributesKeys.Count + _requestedPredicatesKeys.Count)
             {
                 await DialogService.AlertAsync("Some proof attributes are missing");
                 return;
             }
 
-            _requestedAttributesRevealedMap.ForEach(attr => _requestedAttributesMap[attr.Key].Revealed = attr.Value);
-            _requestedPredicatesMap.ForEach(pm => pm.Value.Revealed = false);
+            _requestedAttributesRevealedMap.ForEach(attr => 
+                _requestedAttributesMap[attr.Key].Revealed = attr.Value);
 
-            RequestedCredentials requestedCredentials = new RequestedCredentials
+            var requestedCredentials = new RequestedCredentials
             {
                 RequestedAttributes = _requestedAttributesMap,
                 RequestedPredicates = _requestedPredicatesMap
@@ -148,17 +154,9 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
             var context = await _agentContextProvider.GetContextAsync();
             var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
+            await _messageService.SendAsync(context.Wallet, msg, rec);
 
-            try
-            {
-                _ = await _messageService.SendAsync(context.Wallet, msg, rec);
-            }
-            catch (Exception ex)
-            {
-                DialogService.Alert(ex.Message);
-            }
-
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ProofRequestUpdated });
+            _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
 
             await NavigationService.PopModalAsync();
         }
@@ -167,7 +165,9 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
             {
-                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+                await DialogService
+                    .AlertAsync("Proof state should be " + 
+                                AgentFramework.Core.Models.Records.ProofState.Requested);
                 return;
             }
             if (_previousProofAttribute.Any() && !_previousProofAttribute.ContainsKey(proofAttribute.Name))
@@ -183,7 +183,10 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             else
             {
                 _proofAttributes[proofAttribute.Name] = !_proofAttributes[proofAttribute.Name];
-                _previousProofAttribute = new Dictionary<string, bool> { { proofAttribute.Name, _proofAttributes[proofAttribute.Name] } };
+                _previousProofAttribute = new Dictionary<string, bool>
+                {
+                    { proofAttribute.Name, _proofAttributes[proofAttribute.Name] }
+                };
 
                 IsFrameVisible = _proofAttributes[proofAttribute.Name];
             }
@@ -197,7 +200,9 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
             {
-                await DialogService.AlertAsync("Proof state should be " + AgentFramework.Core.Models.Records.ProofState.Requested.ToString());
+                await DialogService
+                    .AlertAsync("Proof state should be " + 
+                                AgentFramework.Core.Models.Records.ProofState.Requested);
                 return;
             }
 
@@ -214,20 +219,23 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                 IsRevealed = _proofAttributesRevealed[proofAttribute.Name];
             }
 
-            string attributeName = _requestedAtrributesKeys
-                .Where(k => _requestedAttributes[k]["name"]?.ToString() == proofAttribute.Name)
-                .SingleOrDefault();
+            var attributeName = _requestedAttributesKeys
+                .SingleOrDefault(k => _requestedAttributes[k]["name"]?.ToString() == proofAttribute.Name);
 
             Attributes
                 .ForEach(a =>
                 {
-                    if (a.Name == _requestedAttributes[attributeName]["name"]?.ToString())
+                    if (attributeName != null && 
+                        a.Name == _requestedAttributes[attributeName]["name"]?.ToString())
                         a.IsRevealed = IsRevealed;
                 });
 
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ProofRequestAtrributeUpdated });
+            _eventAggregator.Publish(new ApplicationEvent
+            {
+                Type = ApplicationEventType.ProofRequestAtrributeUpdated
+            });
 
-            _requestedAttributesRevealedMap[attributeName] = IsRevealed;
+            if (attributeName != null) _requestedAttributesRevealedMap[attributeName] = IsRevealed;
         }
 
         private void BuildRequestedAttributesPredicatesMap(CredentialRecord proofCredential)
@@ -235,23 +243,23 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             IsFrameVisible = false;
             _proofAttributes[_previousProofAttribute.Keys.Single()] = false;
 
-            RequestedAttribute requestedAttribute = new RequestedAttribute()
+            var requestedAttribute = new RequestedAttribute
             {
                 CredentialId = proofCredential.CredentialId,
                 Revealed = true,
                 Timestamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds()
             };
-            string attributeName = _requestedAtrributesKeys
-                .Where(k => _requestedAttributes[k]["name"]?.ToString() == _previousProofAttribute.Keys.Single())
-                .SingleOrDefault();
+            var attributeName = _requestedAttributesKeys
+                .SingleOrDefault(k => 
+                    _requestedAttributes[k]["name"]?.ToString() == _previousProofAttribute.Keys.Single());
 
-            bool isPredicate = false;
+            var isPredicate = false;
             if (attributeName == null)
             {
                 isPredicate = true;
                 attributeName = _requestedPredicatesKeys
-                    .Where(k => _requestedPredicates[k]["name"]?.ToString() == _previousProofAttribute.Keys.Single())
-                    .SingleOrDefault();
+                    .SingleOrDefault(k => 
+                        _requestedPredicates[k]["name"]?.ToString() == _previousProofAttribute.Keys.Single());
             }
 
             Attributes
@@ -259,24 +267,30 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                 {
                     if (!isPredicate)
                     {
-                        if (a.Name == _requestedAttributes[attributeName]["name"]?.ToString())
+                        if (attributeName != null && 
+                            a.Name == _requestedAttributes[attributeName]["name"]?.ToString())
                             a.Value = proofCredential.SchemaId;
                     }
                     else
                     {
-                        if (a.Name == _requestedPredicates[attributeName]["name"]?.ToString())
+                        if (attributeName != null &&
+                            a.Name == _requestedPredicates[attributeName]["name"]?.ToString())
                             a.Value = proofCredential.SchemaId;
                     }
 
                 });
 
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ProofRequestAtrributeUpdated });
+            _eventAggregator.Publish(new ApplicationEvent
+            {
+                Type = ApplicationEventType.ProofRequestAtrributeUpdated
+            });
 
             if (!isPredicate)
             {
                 if (_requestedAttributesMap.ContainsKey(attributeName))
                 {
-                    if (_requestedAttributesMap[attributeName]?.CredentialId != requestedAttribute.CredentialId)
+                    if (_requestedAttributesMap[attributeName]?.CredentialId != 
+                        requestedAttribute.CredentialId)
                         _requestedAttributesMap[attributeName] = requestedAttribute;
                     return;
                 }
@@ -285,14 +299,15 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             }
             else
             {
-                if (_requestedPredicatesMap.ContainsKey(attributeName))
+                if (attributeName != null && _requestedPredicatesMap.ContainsKey(attributeName))
                 {
-                    if (_requestedPredicatesMap[attributeName]?.CredentialId != requestedAttribute.CredentialId)
+                    if (_requestedPredicatesMap[attributeName]?.CredentialId != 
+                        requestedAttribute.CredentialId)
                         _requestedPredicatesMap[attributeName] = requestedAttribute;
                     return;
                 }
 
-                _requestedPredicatesMap.Add(attributeName, requestedAttribute);
+                if (attributeName != null) _requestedPredicatesMap.Add(attributeName, requestedAttribute);
             }
         }
 
@@ -301,46 +316,53 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             var context = await _agentContextProvider.GetContextAsync();
             var credentialsRecords = await _credentialService.ListAsync(context);
 
-            IList<JObject> restrictions = new List<JObject>();
-            IList<string> credentialDefinitionIds = new List<string>();
+            IList<JObject> restrictions = null;
 
-            string attributeName = _requestedAtrributesKeys
-                .Where(k => _requestedAttributes[k]["name"]?.ToString() == name)
-                .SingleOrDefault();
+            var attributeName = _requestedAttributesKeys
+                .SingleOrDefault(k => _requestedAttributes[k]["name"]?.ToString() == name);
 
             if (attributeName == null)
             {
                 attributeName = _requestedPredicatesKeys
-                    .Where(k => _requestedPredicates[k]["name"]?.ToString() == name)
-                    .SingleOrDefault();
-                restrictions = _requestedPredicates[attributeName]["restrictions"]?.ToObject<List<JObject>>();
+                    .SingleOrDefault(k => _requestedPredicates[k]["name"]?.ToString() == name);
+                if (attributeName != null)
+                    restrictions = _requestedPredicates[attributeName]["restrictions"]?
+                        .ToObject<List<JObject>>();
             }
             else
             {
-                restrictions = _requestedAttributes[attributeName]["restrictions"]?.ToObject<List<JObject>>();
+                restrictions = _requestedAttributes[attributeName]["restrictions"]?
+                    .ToObject<List<JObject>>();
             }
-            credentialDefinitionIds = restrictions
+
+            if (restrictions != null)
+            {
+                IList<string> credentialDefinitionIds = restrictions
                     .Select(r => r["cred_def_id"]?.ToString())
                     .ToList();
 
-            ProofCredentials = credentialsRecords
-                .Where(cr => cr.State == CredentialState.Issued && credentialDefinitionIds.Contains(cr.CredentialDefinitionId))
-                .ToList();
+                ProofCredentials = credentialsRecords
+                    .Where(cr => cr.State == CredentialState.Issued && 
+                                 credentialDefinitionIds.Contains(cr.CredentialDefinitionId))
+                    .ToList();
+            }
         }
 
         private async Task RejectProofRequest()
         {
-            // TODO: proof request reject logic
             await NavigationService.PopModalAsync();
         }
 
         #region Bindable Command
 
-        public ICommand NavigateBackCommand => new Command(async () => await NavigationService.PopModalAsync());
+        public ICommand NavigateBackCommand => new Command(async () => 
+            await NavigationService.PopModalAsync());
 
-        public ICommand AcceptProofRequestCommand => new Command(async () => await AcceptProofRequest());
+        public ICommand AcceptProofRequestCommand => new Command(async () => 
+            await AcceptProofRequest());
 
-        public ICommand RejectProofRequestCommand => new Command(async () => await RejectProofRequest());
+        public ICommand RejectProofRequestCommand => new Command(async () => 
+            await RejectProofRequest());
 
         public ICommand SelectProofAttributeCommand => new Command<ProofAttribute>(async (proofAttribute) =>
         {
