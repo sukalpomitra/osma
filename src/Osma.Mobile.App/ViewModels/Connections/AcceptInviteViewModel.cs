@@ -82,7 +82,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 if (connections.FindAll(con => invite.Label.Equals(con.Alias.Name)).Count != 0) {
                     newSsoConnection = false;
                     var con = connections.Where(conn => invite.Label.Equals(conn.Alias.Name)).First();
-                    var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid;
+                    var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid + "/" + invite.InvitationKey;
                     HttpClient httpClient = new HttpClient();
                     await httpClient.GetAsync(new System.Uri(endpoint));
                 }
