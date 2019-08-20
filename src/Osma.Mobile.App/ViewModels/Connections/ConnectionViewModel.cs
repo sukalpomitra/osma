@@ -52,6 +52,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
             ConnectionName = _record.Alias.Name;
             ConnectionSubtitle = $"{_record.State:G}";
             ConnectionImageUrl = _record.Alias.ImageUrl;
+            IsSSO = _record.Sso;
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -176,6 +177,11 @@ namespace Osma.Mobile.App.ViewModels.Connections
             await NavigationService.NavigateBackAsync();
         });
 
+        public ICommand SSOLoginCommand => new Command(async () =>
+        {
+            await NavigationService.NavigateBackAsync(); //placeholder
+        });
+
         public ICommand RefreshTransactionsCommand => new Command(async () => await RefreshTransactions());
         #endregion
 
@@ -192,6 +198,13 @@ namespace Osma.Mobile.App.ViewModels.Connections
         {
             get => _myDid;
             set => this.RaiseAndSetIfChanged(ref _myDid, value);
+        }
+
+        private bool _isSSO;
+        public bool IsSSO
+        {
+            get => _isSSO;
+            set => this.RaiseAndSetIfChanged(ref _isSSO, value);
         }
 
         private string _theirDid;

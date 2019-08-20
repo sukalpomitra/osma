@@ -188,6 +188,13 @@
                             Command="{Binding DeleteConnectionCommand}"
                             Style="{StaticResource ButtonStyleDestructive}"
                         />
+                        <Button
+                            HorizontalOptions="FillAndExpand"
+                            Text="SSO Login"
+                            IsVisible="{Binding IsSSO}"
+                            Command="{Binding SSOLoginCommand}"
+                            Style="{StaticResource ButtonStyleDestructive}"
+                        />
                     </StackLayout>
                 </Frame>    
             </Frame>

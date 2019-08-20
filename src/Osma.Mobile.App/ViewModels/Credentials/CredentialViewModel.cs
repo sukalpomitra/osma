@@ -10,6 +10,7 @@ using AgentFramework.Core.Models.Records;
 using AgentFramework.Core.Contracts;
 using System.Threading.Tasks;
 using Osma.Mobile.App.Events;
+using System.Collections.ObjectModel;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
