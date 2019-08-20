@@ -11,5 +11,9 @@
         public string FileExt { get; set; }
 
         public string Date { get; set; }
+
+        public bool IsRevealed { get; set; }
+
+        public bool IsNotPredicate { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Models.Proofs;
 using AgentFramework.Core.Models.Records;
 using Autofac;
+using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
@@ -27,6 +28,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ILifetimeScope _scope;
         private readonly IMessageService _messageService;
+        private readonly IEventAggregator _eventAggregator;
 
         public ProofRequestsViewModel(
             IUserDialogs userDialogs,
@@ -34,6 +36,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             IProofService proofService,
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
+            IEventAggregator eventAggregator,
             ILifetimeScope scope    
             ) : base(
                 nameof(ProofRequestsViewModel),
@@ -41,11 +44,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                 navigationService
            )
         {
-
             _proofService = proofService;
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
             _scope = scope;
+            _eventAggregator = eventAggregator;
 
             this.WhenAnyValue(x => x.SearchTerm)
                 .Throttle(TimeSpan.FromMilliseconds(200))
@@ -55,6 +58,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         public override async Task InitializeAsync(object navigationData)
         {
             await RefreshProofs();
+
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                           .Where(_ => _.Type == ApplicationEventType.ProofRequestUpdated)
+                           .Subscribe(async _ => await RefreshProofs());
+
             await base.InitializeAsync(navigationData);
         }
 

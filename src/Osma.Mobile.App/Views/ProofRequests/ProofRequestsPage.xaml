@@ -42,7 +42,7 @@
                     <DataTemplate>
                         <components:DetailedCell
                             Title="{Binding ProofName}"
-                            Subtitle="{Binding ProofVersion}"
+                            Subtitle="{Binding ProofState}"
                         />
                     </DataTemplate>
                 </ListView.ItemTemplate>

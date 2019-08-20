@@ -4,7 +4,9 @@
     {
         ConnectionsUpdated,
         CloudAgentsUpdated,
-        CredentialUpdated
+        CredentialUpdated,
+        ProofRequestUpdated,
+        ProofRequestAtrributeUpdated
     }
 
     public class ApplicationEvent
