@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
@@ -179,7 +180,9 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         public ICommand SSOLoginCommand => new Command(async () =>
         {
-            await NavigationService.NavigateBackAsync(); //placeholder
+            var endpoint = _record.Endpoint.Uri.Replace("response", "trigger/") + _record.MyDid + "/" + _record.InvitationKey;
+            HttpClient httpClient = new HttpClient();
+            await httpClient.GetAsync(new System.Uri(endpoint));
         });
 
         public ICommand RefreshTransactionsCommand => new Command(async () => await RefreshTransactions());

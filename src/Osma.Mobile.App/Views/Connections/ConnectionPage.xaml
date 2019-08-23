@@ -193,7 +193,7 @@
                             Text="SSO Login"
                             IsVisible="{Binding IsSSO}"
                             Command="{Binding SSOLoginCommand}"
-                            Style="{StaticResource ButtonStyleDestructive}"
+                            Style="{StaticResource ButtonStyleAccept}"
                         />
                     </StackLayout>
                 </Frame>    
