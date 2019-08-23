@@ -52,6 +52,13 @@
                 VerticalOptions="Center"
                 FontSize="Small"
             />
+            <Label
+                x:Name="TextAnnotationLabel"
+                Grid.Row="2"
+                Grid.Column="1"
+                VerticalOptions="Center"
+                FontSize="Small"
+            />
             <Frame
                 IsVisible="false"
                 Grid.Row="0"

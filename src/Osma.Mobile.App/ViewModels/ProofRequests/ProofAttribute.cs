@@ -15,5 +15,6 @@
         public bool IsRevealed { get; set; }
 
         public bool IsNotPredicate { get; set; }
+
     }
 }

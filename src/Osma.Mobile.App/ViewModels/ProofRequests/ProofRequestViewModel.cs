@@ -27,6 +27,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly IMessageService _messageService;
         private readonly IEventAggregator _eventAggregator;
         private readonly ICredentialService _credentialService;
+        private readonly IConnectionService _connectionService;
 
         private readonly JObject _requestedAttributes;
         private readonly JObject _requestedPredicates;
@@ -50,6 +51,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
             ICredentialService credentialService,
+            IConnectionService connectionService,
             IEventAggregator eventAggregator,
             ProofRecord proof
         ) : base(
@@ -63,7 +65,10 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
             _credentialService = credentialService;
+            _connectionService = connectionService;
             _eventAggregator = eventAggregator;
+            GetConnectionAlias();
+
 
             var requestJson = (JObject)JsonConvert.DeserializeObject(_proof.RequestJson);
 
@@ -106,6 +111,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             }
         }
 
+        private async void GetConnectionAlias()
+        {
+            var agentContext = await _agentContextProvider.GetContextAsync();
+            var connection = await _connectionService.GetAsync(agentContext, _proof.ConnectionId);
+            Alias = connection.Alias.Name;
+        }
+
         public override async Task InitializeAsync(object navigationData)
         {
             RefreshProofRequest();
@@ -125,7 +137,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
             RefreshingProofRequest = false;
         }
-
+        
         private async Task AcceptProofRequest()
         {
             if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
@@ -440,6 +452,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             set => this.RaiseAndSetIfChanged(ref _refreshingProofRequest, value);
         }
 
+        private string _alias;
+
+        public string Alias
+        {
+            get => _alias;
+            set => this.RaiseAndSetIfChanged(ref _alias, value);
+        }
         #endregion
     }
 }

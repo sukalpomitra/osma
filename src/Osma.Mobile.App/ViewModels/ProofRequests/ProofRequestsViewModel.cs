@@ -28,6 +28,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ILifetimeScope _scope;
         private readonly IMessageService _messageService;
+        private readonly IConnectionService _connectionService;
         private readonly IEventAggregator _eventAggregator;
 
         public ProofRequestsViewModel(
@@ -37,6 +38,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
             IEventAggregator eventAggregator,
+            IConnectionService connectionService,
             ILifetimeScope scope    
             ) : base(
                 nameof(ProofRequestsViewModel),
@@ -48,6 +50,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
             _scope = scope;
+            _connectionService = connectionService;
             _eventAggregator = eventAggregator;
 
             this.WhenAnyValue(x => x.SearchTerm)
@@ -90,6 +93,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             RefreshingProofRequests = false;
         }
 
+        
         public async Task SelectProofRequest(ProofRequestViewModel proof) => await NavigationService.NavigateToAsync(proof, null, NavigationType.Modal);
 
         private IEnumerable<ProofRequestViewModel> FilterProofRequests(string term, IEnumerable<ProofRequestViewModel> proofs)

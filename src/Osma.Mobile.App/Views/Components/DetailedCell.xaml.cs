@@ -55,6 +55,34 @@ namespace Osma.Mobile.App.Views.Components
             });
         }
 
+        public static readonly BindableProperty TextAnnotationProperty =
+        BindableProperty.Create("TextAnnotation", typeof(string), typeof(DetailedCell), "",
+        propertyChanged: TextAnnotationPropertyChanged);
+
+        public string TextAnnotation
+        {
+            get { return (string)GetValue(TextAnnotationProperty); }
+            set { SetValue(TextAnnotationProperty, value); }
+        }
+
+        static void TextAnnotationPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            DetailedCell cell = (DetailedCell)bindable;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                cell.TextAnnotationLabel.Text = newValue.ToString();
+                if (string.IsNullOrWhiteSpace(newValue.ToString()))
+                {
+                    Grid.SetRowSpan(cell.TitleLabel, 2);
+                }
+                else
+                {
+                    Grid.SetRowSpan(cell.TitleLabel, 1);
+                }
+            });
+        }
+
+
 
         public static readonly BindableProperty ImageURLProperty =
             BindableProperty.Create("ImageURL", typeof(string), typeof(DetailedCell), "", propertyChanged: ImageURLPropertyChanged);

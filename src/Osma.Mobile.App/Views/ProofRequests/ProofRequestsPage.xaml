@@ -41,8 +41,9 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <components:DetailedCell
-                            Title="{Binding ProofName}"
-                            Subtitle="{Binding ProofState}"
+                        Title="{Binding ProofName}"
+                        Subtitle="{Binding ProofVersion}"
+                        TextAnnotation="{Binding Alias}"
                         />
                     </DataTemplate>
                 </ListView.ItemTemplate>
