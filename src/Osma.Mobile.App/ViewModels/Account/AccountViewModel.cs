@@ -26,7 +26,7 @@ namespace Osma.Mobile.App.ViewModels.Account
             _appVersion = AppInfo.VersionString;
             _buildVersion = AppInfo.BuildString;
 #if DEBUG
-            _fullName = "Jamie Doe";
+            _fullName = "Sukalpo Mitra";
             _avatarUrl = "http://i.pravatar.cc/100";
 #endif
         }
