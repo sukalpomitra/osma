@@ -18,7 +18,7 @@ namespace Osma.Mobile.App.Views
 
         private string GetPageName(Page page)
         {
-            return "Ruined Reynolds";
+            return "Sukalpo Mitra";
             if (page.BindingContext is ABaseViewModel vmBase)
                 return vmBase.Name;
             return null;
