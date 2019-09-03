@@ -12,6 +12,8 @@ using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
 using System.Net.Http;
+using Plugin.Fingerprint;
+
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {
@@ -65,35 +67,51 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         private async Task CreateConnection(IAgentContext context, ConnectionInvitationMessage invite)
         {
-            var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
-            var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
-            var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-            string responseEndpoint = string.Empty;
-            if (records.Count > 0)
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
             {
-                var record = _registrationService.getRandomCloudAgent(records);
-                responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
-                isEndpointUriAbsent = false;
-            }
-            bool newSsoConnection = true;
-            if (invite.Sso)
-            {
-                var connections = await _connectionService.ListAsync(context);
-                if (connections.FindAll(con => invite.Label.Equals(con.Alias.Name)).Count != 0) {
-                    newSsoConnection = false;
-                    var con = connections.Where(conn => invite.Label.Equals(conn.Alias.Name)).First();
-                    var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid + "/" + invite.InvitationKey;
-                    HttpClient httpClient = new HttpClient();
-                    await httpClient.GetAsync(new System.Uri(endpoint));
-                }
-            }
-            if (newSsoConnection) {
-                var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
-                var rsp = await _messageService.SendAsync(context.Wallet, msg, rec, invite.RecipientKeys.First(), isEndpointUriAbsent);
-
-                if (isEndpointUriAbsent)
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Wallet Access");
+                if (!auth.Authenticated)
                 {
-                    await _connectionService.ProcessResponseAsync(context, rsp.GetMessage<ConnectionResponseMessage>(), rec);
+                    authenticated = false;
+                }
+              
+            }
+            if (authenticated)
+            {
+                var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
+                var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
+                var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+                string responseEndpoint = string.Empty;
+                if (records.Count > 0)
+                {
+                    var record = _registrationService.getRandomCloudAgent(records);
+                    responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
+                    isEndpointUriAbsent = false;
+                }
+                bool newSsoConnection = true;
+                if (invite.Sso)
+                {
+                    var connections = await _connectionService.ListAsync(context);
+                    if (connections.FindAll(con => invite.Label.Equals(con.Alias.Name)).Count != 0)
+                    {
+                        newSsoConnection = false;
+                        var con = connections.Where(conn => invite.Label.Equals(conn.Alias.Name)).First();
+                        var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid + "/" + invite.InvitationKey;
+                        HttpClient httpClient = new HttpClient();
+                        await httpClient.GetAsync(new System.Uri(endpoint));
+                    }
+                }
+                if (newSsoConnection)
+                {
+                    var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
+                    var rsp = await _messageService.SendAsync(context.Wallet, msg, rec, invite.RecipientKeys.First(), isEndpointUriAbsent);
+
+                    if (isEndpointUriAbsent)
+                    {
+                        await _connectionService.ProcessResponseAsync(context, rsp.GetMessage<ConnectionResponseMessage>(), rec);
+                    }
                 }
             }
         }

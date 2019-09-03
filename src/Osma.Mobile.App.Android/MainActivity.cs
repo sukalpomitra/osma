@@ -11,6 +11,8 @@ using Autofac;
 using FFImageLoading.Forms.Platform;
 using Java.Lang;
 using Xamarin.Forms;
+using Plugin.CurrentActivity;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.Droid
 {
@@ -23,6 +25,9 @@ namespace Osma.Mobile.App.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(bundle);
+            CrossCurrentActivity.Current.Init(this.Application);
+
+            CrossFingerprint.SetCurrentActivityResolver(() => CrossCurrentActivity.Current.Activity);
 
             Forms.Init(this, bundle);
 
