@@ -27,8 +27,11 @@ namespace Osma.Mobile.App.ViewModels
                                  userDialogs, 
                                  navigationService)
         {
+            DetectBiometricCapability();
             _navigationService = navigationService;
             _agentContextProvider = agentContextProvider;
+            _fullName = "";
+            _passCode = "";
             //set Account Object to have the full Name. But figure where the account is beingcreated. 
         }
 
@@ -40,7 +43,34 @@ namespace Osma.Mobile.App.ViewModels
             set => this.RaiseAndSetIfChanged(ref _fullName, value);
         }
 
+        private string _passCode;
+        public string PassCode
+        {
+            get => _passCode;
+            set => this.RaiseAndSetIfChanged(ref _passCode, value);
+        }
+
+        private bool _noBiometric;
+        public bool NoBiometric
+        {
+            get => _noBiometric;
+            set => this.RaiseAndSetIfChanged(ref _noBiometric, value);
+        }
+
+        private bool _secured;
+        public bool Secured
+        {
+            get => _secured;
+            set => this.RaiseAndSetIfChanged(ref _secured, value);
+        }
+
         #endregion
+
+        private async Task DetectBiometricCapability()
+        {
+            _noBiometric = !(await CrossFingerprint.Current.IsAvailableAsync(true));
+            _secured = false;
+        }
 
         #region Bindable Commands
         public ICommand CreateWalletCommand => new Command(async () =>
@@ -66,7 +96,7 @@ namespace Osma.Mobile.App.ViewModels
                         WalletConfiguration = new WalletConfiguration { Id = Guid.NewGuid().ToString() },
                         WalletCredentials = new WalletCredentials { Key = "LocalWalletKey" }
                     },
-                    Name = "Dummy Doe"
+                    Name = FullName
                 };
 
                 if (await _agentContextProvider.CreateAgentAsync(options))

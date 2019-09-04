@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Acr.UserDialogs;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
+using AgentFramework.Core.Contracts;
 using ReactiveUI;
 using Xamarin.Forms;
 using Xamarin.Essentials;
@@ -13,10 +14,12 @@ namespace Osma.Mobile.App.ViewModels.Account
     public class AccountViewModel : ABaseViewModel
     {
         private readonly ICustomAgentContextProvider _agentContextProvider;
+        private readonly IProvisioningService _provisioningService;
         public AccountViewModel(
             IUserDialogs userDialogs,
             INavigationService navigationService,
-            ICustomAgentContextProvider agentContextProvider
+            ICustomAgentContextProvider agentContextProvider,
+            IProvisioningService provisioningService
         ) : base(
             nameof(AccountViewModel),
             userDialogs,
@@ -25,14 +28,18 @@ namespace Osma.Mobile.App.ViewModels.Account
         {
             _appVersion = AppInfo.VersionString;
             _buildVersion = AppInfo.BuildString;
+            _agentContextProvider = agentContextProvider;
+            _provisioningService = provisioningService;
 #if DEBUG
-            _fullName = "Sukalpo Mitra";
             _avatarUrl = "http://i.pravatar.cc/100";
 #endif
         }
 
         public override async Task InitializeAsync(object navigationData)
         {
+            var context = await _agentContextProvider.GetContextAsync();
+            var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
+            _fullName = provisioningRecord.Owner.Name;
             await base.InitializeAsync(navigationData);
         }
 

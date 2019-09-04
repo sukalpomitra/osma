@@ -1,7 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:Osma.Mobile.App.Converters"
              x:Class="Osma.Mobile.App.Views.RegisterPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="BooleanInverse" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout>
             <!--<Label
@@ -9,16 +15,27 @@
                 HorizontalOptions="Center"
                 Text="Welcome to Osma"></Label>-->
             <Label Text="Welcome to the red.dot"/>
-            <Label Text="To create your ID we will need to collect some personal information." />
+            <Label Text="To create your ID we will need to create a pass code." />
             <Label Text="Let's start with your full name:" />
             <Entry Text="{Binding FullName}"
                x:Name="fullName"
                Placeholder="Please enter full name"
                PlaceholderColor="Olive"
                MaxLength="30"/>
-            <Button 
+            <Label Text="We also need a pass code:"  IsVisible="{Binding NoBiometric}"/>
+            <Entry Text="{Binding PassCode}"
+               x:Name="passCode"
+               IsPassword="True"
+               Placeholder="Please enter a 6 digit passcode"
+               PlaceholderColor="Olive"
+               Keyboard="Numeric"
+               IsVisible="{Binding NoBiometric}"
+               MaxLength="6"/>
+            <Button
+                x:Name="createWallet"
                 VerticalOptions="CenterAndExpand"
                 Text="Create Wallet"
+                IsVisible="{Binding Secured}"
                 Command="{Binding CreateWalletCommand}"/>
         </StackLayout>
     </ContentPage.Content>
