@@ -10,6 +10,7 @@ using AgentFramework.Core.Models.Records;
 using AgentFramework.Core.Contracts;
 using System.Threading.Tasks;
 using Osma.Mobile.App.Events;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
@@ -69,37 +70,58 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
         private async Task AcceptCredentialOffer()
         {
-            if (_credential.State != CredentialState.Offered)
+            if (await isAuthenticatedAsync())
             {
-                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                if (_credential.State != CredentialState.Offered)
+                {
+                    await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                    await NavigationService.PopModalAsync();
+                    return;
+                }
+
+                var context = await _agentContextProvider.GetContextAsync();
+                var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
+                _ = await _messageService.SendAsync(context.Wallet, msg, rec);
+
+                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
                 await NavigationService.PopModalAsync();
-                return;
             }
-
-            var context = await _agentContextProvider.GetContextAsync();
-            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
-            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
-
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
-
-            await NavigationService.PopModalAsync();
         }
 
         private async Task RejectCredentialOffer()
         {
-            if (_credential.State != CredentialState.Offered)
+            if (await isAuthenticatedAsync())
             {
-                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                if (_credential.State != CredentialState.Offered)
+                {
+                    await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
+                    await NavigationService.PopModalAsync();
+                    return;
+                }
+
+                var context = await _agentContextProvider.GetContextAsync();
+                await _credentialService.RejectOfferAsync(context, _credential.Id);
+
+                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
                 await NavigationService.PopModalAsync();
-                return;
             }
+        }
 
-            var context = await _agentContextProvider.GetContextAsync();
-            await _credentialService.RejectOfferAsync(context, _credential.Id);
-
-            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
-
-            await NavigationService.PopModalAsync();
+        private async Task<bool> isAuthenticatedAsync()
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            return authenticated;
         }
 
         #region Bindable Command

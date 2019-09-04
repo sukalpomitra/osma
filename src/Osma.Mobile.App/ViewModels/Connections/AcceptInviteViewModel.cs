@@ -67,18 +67,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         private async Task CreateConnection(IAgentContext context, ConnectionInvitationMessage invite)
         {
-            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
-            bool authenticated = true;
-            if (result)
-            {
-                var auth = await CrossFingerprint.Current.AuthenticateAsync("Wallet Access");
-                if (!auth.Authenticated)
-                {
-                    authenticated = false;
-                }
-              
-            }
-            if (authenticated)
+            if (await isAuthenticatedAsync())
             {
                 var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
                 var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
@@ -118,12 +107,30 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         private async Task RegisterCloudAgent(IAgentContext context, CloudAgentRegistrationMessage registration)
         {
-            var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-            if (records.FindAll(x => x.Label.Equals(registration.Label)).Count != 0)
+            if (await isAuthenticatedAsync())
             {
-                throw new AgentFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, $"{registration.Label} already registered!");
+                var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+                if (records.FindAll(x => x.Label.Equals(registration.Label)).Count != 0)
+                {
+                    throw new AgentFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, $"{registration.Label} already registered!");
+                }
+                await _registrationService.RegisterCloudAgentAsync(context, registration);
             }
-            await _registrationService.RegisterCloudAgentAsync(context, registration);
+        }
+
+        private async Task<bool> isAuthenticatedAsync()
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            return authenticated;
         }
 
         #region Bindable Commands

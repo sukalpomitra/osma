@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using AgentFramework.Core.Models.Proofs;
 using Xamarin.Forms.Internals;
 using System.Reactive.Linq;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.ViewModels.ProofRequests
 {
@@ -140,37 +141,40 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         
         private async Task AcceptProofRequest()
         {
-            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            if (await isAuthenticatedAsync())
             {
-                await DialogService
-                    .AlertAsync("Proof state should be " + 
-                                AgentFramework.Core.Models.Records.ProofState.Requested);
-                return;
+                if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+                {
+                    await DialogService
+                        .AlertAsync("Proof state should be " +
+                                    AgentFramework.Core.Models.Records.ProofState.Requested);
+                    return;
+                }
+
+                if (_requestedAttributesMap.Keys.Count + _requestedPredicatesMap.Keys.Count !=
+                    _requestedAttributesKeys.Count + _requestedPredicatesKeys.Count)
+                {
+                    await DialogService.AlertAsync("Some proof attributes are missing");
+                    return;
+                }
+
+                _requestedAttributesRevealedMap.ForEach(attr =>
+                    _requestedAttributesMap[attr.Key].Revealed = attr.Value);
+
+                var requestedCredentials = new RequestedCredentials
+                {
+                    RequestedAttributes = _requestedAttributesMap,
+                    RequestedPredicates = _requestedPredicatesMap
+                };
+
+                var context = await _agentContextProvider.GetContextAsync();
+                var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
+                await _messageService.SendAsync(context.Wallet, msg, rec);
+
+                _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
+
+                await NavigationService.PopModalAsync();
             }
-
-            if (_requestedAttributesMap.Keys.Count + _requestedPredicatesMap.Keys.Count != 
-                _requestedAttributesKeys.Count + _requestedPredicatesKeys.Count)
-            {
-                await DialogService.AlertAsync("Some proof attributes are missing");
-                return;
-            }
-
-            _requestedAttributesRevealedMap.ForEach(attr => 
-                _requestedAttributesMap[attr.Key].Revealed = attr.Value);
-
-            var requestedCredentials = new RequestedCredentials
-            {
-                RequestedAttributes = _requestedAttributesMap,
-                RequestedPredicates = _requestedPredicatesMap
-            };
-
-            var context = await _agentContextProvider.GetContextAsync();
-            var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
-            await _messageService.SendAsync(context.Wallet, msg, rec);
-
-            _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
-
-            await NavigationService.PopModalAsync();
         }
 
         private async Task LoadProofCredentials(ProofAttribute proofAttribute)
@@ -361,7 +365,25 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task RejectProofRequest()
         {
-            await NavigationService.PopModalAsync();
+            if (await isAuthenticatedAsync())
+            {
+                await NavigationService.PopModalAsync();
+            }
+        }
+
+        private async Task<bool> isAuthenticatedAsync()
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            return authenticated;
         }
 
         #region Bindable Command
