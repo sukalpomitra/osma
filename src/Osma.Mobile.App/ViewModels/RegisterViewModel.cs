@@ -11,6 +11,7 @@ using Osma.Mobile.App.Views.Legal;
 using Osma.Mobile.App.Views.UserRegistration;
 using ReactiveUI;
 using Xamarin.Forms;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.ViewModels
 {
@@ -44,41 +45,59 @@ namespace Osma.Mobile.App.ViewModels
         #region Bindable Commands
         public ICommand CreateWalletCommand => new Command(async () =>
         {
-            var dialog = UserDialogs.Instance.Loading("Creating wallet");
-
-            var genesisFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "pool_genesis.Remote.txn");
-
-            //TODO this register VM will have far more logic around the registration complexities, i.e backupservices
-            //suppling ownership info to the agent etc..
-            var options = new AgentOptions
+            if (await isAuthenticatedAsync())
             {
-                PoolOptions = new PoolOptions
+                var dialog = UserDialogs.Instance.Loading("Creating wallet");
+
+                var genesisFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "pool_genesis.Remote.txn");
+
+                //TODO this register VM will have far more logic around the registration complexities, i.e backupservices
+                //suppling ownership info to the agent etc..
+                var options = new AgentOptions
                 {
-                    GenesisFilename = genesisFilePath,
-                    PoolName = "EdgeAgentPoolConnection",
-                    ProtocolVersion = 2
-                },
-                WalletOptions = new WalletOptions
-                {
-                    WalletConfiguration = new WalletConfiguration {Id = Guid.NewGuid().ToString() },
-                    WalletCredentials = new WalletCredentials {Key = "LocalWalletKey" }
-                },
-                Name = "Dummy Doe"
-            };
+                    PoolOptions = new PoolOptions
+                    {
+                        GenesisFilename = genesisFilePath,
+                        PoolName = "EdgeAgentPoolConnection",
+                        ProtocolVersion = 2
+                    },
+                    WalletOptions = new WalletOptions
+                    {
+                        WalletConfiguration = new WalletConfiguration { Id = Guid.NewGuid().ToString() },
+                        WalletCredentials = new WalletCredentials { Key = "LocalWalletKey" }
+                    },
+                    Name = "Dummy Doe"
+                };
 
-            if (await _agentContextProvider.CreateAgentAsync(options))
-            {
-                await NavigationService.NavigateToAsync<MainViewModel>();
-                dialog?.Hide();
-                dialog?.Dispose();
-            }
-            else
-            {
-                dialog?.Hide();
-                dialog?.Dispose();
-                UserDialogs.Instance.Alert("Failed to create wallet!")  ;
+                if (await _agentContextProvider.CreateAgentAsync(options))
+                {
+                    await NavigationService.NavigateToAsync<MainViewModel>();
+                    dialog?.Hide();
+                    dialog?.Dispose();
+                }
+                else
+                {
+                    dialog?.Hide();
+                    dialog?.Dispose();
+                    UserDialogs.Instance.Alert("Failed to create wallet!");
+                }
             }
         });
+
+        private async Task<bool> isAuthenticatedAsync()
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            return authenticated;
+        }
 
         //public ICommand OpenFullNamePageCommand => new Command(async () => await _navigationService.NavigateToAsync<FullNameViewModel>());
         #endregion
