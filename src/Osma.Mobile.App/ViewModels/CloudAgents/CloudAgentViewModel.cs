@@ -8,6 +8,7 @@ using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -18,12 +19,16 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly ICloudAgentRegistrationService _registrationService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IProvisioningService _provisioningService;
+        private readonly INavigationService _navigationService;
+        private readonly IUserDialogs _userDialogs;
 
         public CloudAgentViewModel(IUserDialogs userDialogs,
                                    INavigationService navigationService,
                                    ICustomAgentContextProvider agentContextProvider,
                                    IEventAggregator eventAggregator,
                                    ICloudAgentRegistrationService registrationService,
+                                   IProvisioningService provisioningService,
                                    CloudAgentRegistrationRecord record) :
                                    base(nameof(CloudAgentViewModel),
                                        userDialogs,
@@ -33,11 +38,17 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
             _eventAggregator = eventAggregator;
             _registrationService = registrationService;
             _record = record;
-
+            _userDialogs = userDialogs;
+            _navigationService = navigationService;
+            _provisioningService = provisioningService;
             CloudAgentLabel = _record.Label;
             TheirVK = _record.TheirVk;
             CloudAgentName = _record.GetType().Name;
             CloudAgentEndPoint = _record.Endpoint;
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedDeleteCloudAgent.ToString(), async (p) => {
+                await DeleteCloudAgent();
+            });
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -54,15 +65,45 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
 
         public ICommand DeleteCloudAgentCommand => new Command(async () =>
         {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedDeleteCloudAgent))
+            {
+                await DeleteCloudAgent();
+            }
+        });
+
+        #endregion
+
+        private async Task DeleteCloudAgent()
+        {
             var context = await _agentContextProvider.GetContextAsync();
             await _registrationService.removeCloudAgentAsync(context.Wallet, _record.Id);
 
             _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CloudAgentsUpdated });
 
             await NavigationService.NavigateBackAsync();
-        });
+        }
 
-        #endregion
+        private async Task<bool> isAuthenticatedAsync(ApplicationEventType eventType)
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            else
+            {
+                authenticated = false;
+                var vm = new PassCodeViewModel(_userDialogs, _navigationService, _agentContextProvider, _provisioningService);
+                vm.Event = eventType;
+                await NavigationService.NavigateToPopupAsync<PassCodeViewModel>(true, vm);
+            }
+            return authenticated;
+        }
 
         #region Bindable Properties
 

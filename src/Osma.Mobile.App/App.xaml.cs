@@ -19,6 +19,7 @@ using Osma.Mobile.App.Views.Connections;
 using Osma.Mobile.App.Views.CreateInvitation;
 using Osma.Mobile.App.Views.Credentials;
 using Osma.Mobile.App.Views.ProofRequests;
+using Osma.Mobile.App.Views.Security;
 using Osma.Mobile.App.Views.UserRegistration;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -60,13 +61,13 @@ namespace Osma.Mobile.App
             _navigationService.AddPageViewModelBinding<CredentialViewModel, CredentialPage>();
             _navigationService.AddPageViewModelBinding<AccountViewModel, AccountPage>();
             _navigationService.AddPageViewModelBinding<CreateInvitationViewModel, CreateInvitationPage>();
-            _navigationService.AddPageViewModelBinding<FullNameViewModel, FullNamePage>();
-            _navigationService.AddPageViewModelBinding<EmailAddressViewModel, EmailAddressPage>();
             _navigationService.AddPageViewModelBinding<PhoneNumberViewModel, PhoneNumberPage>();
             _navigationService.AddPageViewModelBinding<CloudAgentsViewModel, CloudAgentsPage>();
             _navigationService.AddPageViewModelBinding<CloudAgentViewModel, CloudAgentPage>();
             _navigationService.AddPageViewModelBinding<ProofRequestsViewModel, ProofRequestsPage>();
             _navigationService.AddPageViewModelBinding<ProofRequestViewModel, ProofRequestPage>();
+
+            _navigationService.AddPopupViewModelBinding<PassCodeViewModel, PassCodePage>();
 
             if (_contextProvider.AgentExists())
             {

@@ -16,6 +16,7 @@ using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Views.Connections;
 using ReactiveUI;
 using Xamarin.Forms;
+using Plugin.Fingerprint;
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {
@@ -28,6 +29,9 @@ namespace Osma.Mobile.App.ViewModels.Connections
         private readonly IDiscoveryService _discoveryService;
         private readonly IConnectionService _connectionService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IProvisioningService _provisioningService;
+        private readonly INavigationService _navigationService;
+        private readonly IUserDialogs _userDialogs;
 
         public ConnectionViewModel(IUserDialogs userDialogs,
                                    INavigationService navigationService,
@@ -36,7 +40,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
                                    IDiscoveryService discoveryService,
                                    IConnectionService connectionService,
                                    IEventAggregator eventAggregator,
-                                   ConnectionRecord record) :
+                                   IProvisioningService provisioningService,
+        ConnectionRecord record) :
                                    base(nameof(ConnectionViewModel),
                                        userDialogs,
                                        navigationService)
@@ -46,7 +51,9 @@ namespace Osma.Mobile.App.ViewModels.Connections
             _discoveryService = discoveryService;
             _connectionService = connectionService;
             _eventAggregator = eventAggregator;
-
+            _userDialogs = userDialogs;
+            _navigationService = navigationService;
+            _provisioningService = provisioningService;
             _record = record;
             MyDid = _record.MyDid;
             TheirDid = _record.TheirDid;
@@ -54,6 +61,14 @@ namespace Osma.Mobile.App.ViewModels.Connections
             ConnectionSubtitle = $"{_record.State:G}";
             ConnectionImageUrl = _record.Alias.ImageUrl;
             IsSSO = _record.Sso;
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedDeleteConnection.ToString(), async (p) => {
+                await DeleteConnection();
+            });
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedSSO.ToString(), async (p) => {
+                await SSOLogin();
+            });
         }
 
         public override async Task InitializeAsync(object navigationData)
@@ -162,6 +177,14 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         public ICommand DeleteConnectionCommand => new Command(async () =>
         {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedDeleteConnection))
+            {
+                await DeleteConnection();
+            }
+        });
+
+        private async Task DeleteConnection()
+        {
             var dialog = DialogService.Loading("Deleting");
 
             var context = await _agentContextProvider.GetContextAsync();
@@ -176,17 +199,47 @@ namespace Osma.Mobile.App.ViewModels.Connections
             }
 
             await NavigationService.NavigateBackAsync();
-        });
+        }
 
         public ICommand SSOLoginCommand => new Command(async () =>
+        {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedSSO))
+            {
+                await SSOLogin();
+            }
+        });
+
+        private async Task SSOLogin()
         {
             var endpoint = _record.Endpoint.Uri.Replace("response", "trigger/") + _record.MyDid + "/" + _record.InvitationKey;
             HttpClient httpClient = new HttpClient();
             await httpClient.GetAsync(new System.Uri(endpoint));
-        });
+        }
 
         public ICommand RefreshTransactionsCommand => new Command(async () => await RefreshTransactions());
         #endregion
+
+        private async Task<bool> isAuthenticatedAsync(ApplicationEventType eventType)
+        {
+            var result = await CrossFingerprint.Current.IsAvailableAsync(true);
+            bool authenticated = true;
+            if (result)
+            {
+                var auth = await CrossFingerprint.Current.AuthenticateAsync("Please authenticate to proceed");
+                if (!auth.Authenticated)
+                {
+                    authenticated = false;
+                }
+            }
+            else
+            {
+                authenticated = false;
+                var vm = new PassCodeViewModel(_userDialogs, _navigationService, _agentContextProvider, _provisioningService);
+                vm.Event = eventType;
+                await NavigationService.NavigateToPopupAsync<PassCodeViewModel>(true, vm);
+            }
+            return authenticated;
+        }
 
         #region Bindable Properties
         private string _connectionName;

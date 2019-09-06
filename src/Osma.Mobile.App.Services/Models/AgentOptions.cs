@@ -12,6 +12,12 @@
         public string Name { get; set; }
 
         /// <summary>
+        ///     Gets or sets the agent passcode.
+        /// </summary>
+        /// <value>The pass code.</value>
+        public string PassCode { get; set; }
+
+        /// <summary>
         ///     Gets or sets the wallet configuration.
         /// </summary>
         /// <value>The wallet configuration.</value>

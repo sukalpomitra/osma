@@ -29,6 +29,9 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         private readonly IEventAggregator _eventAggregator;
         private readonly ICredentialService _credentialService;
         private readonly IConnectionService _connectionService;
+        private readonly IProvisioningService _provisioningService;
+        private readonly INavigationService _navigationService;
+        private readonly IUserDialogs _userDialogs;
 
         private readonly JObject _requestedAttributes;
         private readonly JObject _requestedPredicates;
@@ -54,6 +57,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             ICredentialService credentialService,
             IConnectionService connectionService,
             IEventAggregator eventAggregator,
+            IProvisioningService provisioningService,
             ProofRecord proof
         ) : base(
             nameof(ProofRequestViewModel),
@@ -68,6 +72,9 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             _credentialService = credentialService;
             _connectionService = connectionService;
             _eventAggregator = eventAggregator;
+            _userDialogs = userDialogs;
+            _navigationService = navigationService;
+            _provisioningService = provisioningService;
             GetConnectionAlias();
 
 
@@ -110,6 +117,14 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
                 _requestedAttributesKeys.ForEach(k => _requestedAttributesRevealedMap.Add(k, true));
             }
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedProofAccept.ToString(), async (p) => {
+                await AcceptProofRequest();
+            });
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedProofReject.ToString(), async (p) => {
+                await RejectProofRequest();
+            });
         }
 
         private async void GetConnectionAlias()
@@ -141,40 +156,37 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         
         private async Task AcceptProofRequest()
         {
-            if (await isAuthenticatedAsync())
+            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
             {
-                if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
-                {
-                    await DialogService
-                        .AlertAsync("Proof state should be " +
-                                    AgentFramework.Core.Models.Records.ProofState.Requested);
-                    return;
-                }
-
-                if (_requestedAttributesMap.Keys.Count + _requestedPredicatesMap.Keys.Count !=
-                    _requestedAttributesKeys.Count + _requestedPredicatesKeys.Count)
-                {
-                    await DialogService.AlertAsync("Some proof attributes are missing");
-                    return;
-                }
-
-                _requestedAttributesRevealedMap.ForEach(attr =>
-                    _requestedAttributesMap[attr.Key].Revealed = attr.Value);
-
-                var requestedCredentials = new RequestedCredentials
-                {
-                    RequestedAttributes = _requestedAttributesMap,
-                    RequestedPredicates = _requestedPredicatesMap
-                };
-
-                var context = await _agentContextProvider.GetContextAsync();
-                var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
-                await _messageService.SendAsync(context.Wallet, msg, rec);
-
-                _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
-
-                await NavigationService.PopModalAsync();
+                await DialogService
+                    .AlertAsync("Proof state should be " +
+                                AgentFramework.Core.Models.Records.ProofState.Requested);
+                return;
             }
+
+            if (_requestedAttributesMap.Keys.Count + _requestedPredicatesMap.Keys.Count !=
+                _requestedAttributesKeys.Count + _requestedPredicatesKeys.Count)
+            {
+                await DialogService.AlertAsync("Some proof attributes are missing");
+                return;
+            }
+
+            _requestedAttributesRevealedMap.ForEach(attr =>
+                _requestedAttributesMap[attr.Key].Revealed = attr.Value);
+
+            var requestedCredentials = new RequestedCredentials
+            {
+                RequestedAttributes = _requestedAttributesMap,
+                RequestedPredicates = _requestedPredicatesMap
+            };
+
+            var context = await _agentContextProvider.GetContextAsync();
+            var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
+            await _messageService.SendAsync(context.Wallet, msg, rec);
+
+            _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
+
+            await NavigationService.PopModalAsync();
         }
 
         private async Task LoadProofCredentials(ProofAttribute proofAttribute)
@@ -365,13 +377,10 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task RejectProofRequest()
         {
-            if (await isAuthenticatedAsync())
-            {
-                await NavigationService.PopModalAsync();
-            }
+            await NavigationService.PopModalAsync();
         }
 
-        private async Task<bool> isAuthenticatedAsync()
+        private async Task<bool> isAuthenticatedAsync(ApplicationEventType eventType)
         {
             var result = await CrossFingerprint.Current.IsAvailableAsync(true);
             bool authenticated = true;
@@ -383,6 +392,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
                     authenticated = false;
                 }
             }
+            else
+            {
+                authenticated = false;
+                var vm = new PassCodeViewModel(_userDialogs, _navigationService, _agentContextProvider, _provisioningService);
+                vm.Event = eventType;
+                await NavigationService.NavigateToPopupAsync<PassCodeViewModel>(true, vm);
+            }
             return authenticated;
         }
 
@@ -391,11 +407,21 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         public ICommand NavigateBackCommand => new Command(async () => 
             await NavigationService.PopModalAsync());
 
-        public ICommand AcceptProofRequestCommand => new Command(async () => 
-            await AcceptProofRequest());
+        public ICommand AcceptProofRequestCommand => new Command(async () =>
+        {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedProofAccept))
+            {
+                await AcceptProofRequest();
+            }
+        });
 
-        public ICommand RejectProofRequestCommand => new Command(async () => 
-            await RejectProofRequest());
+        public ICommand RejectProofRequestCommand => new Command(async () =>
+        {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedProofReject))
+            {
+                await RejectProofRequest();
+            }
+        });
 
         public ICommand SelectProofAttributeCommand => new Command<ProofAttribute>(async (proofAttribute) =>
         {

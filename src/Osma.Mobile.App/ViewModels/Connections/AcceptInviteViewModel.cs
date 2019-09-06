@@ -13,7 +13,8 @@ using ReactiveUI;
 using Xamarin.Forms;
 using System.Net.Http;
 using Plugin.Fingerprint;
-
+using Osma.Mobile.App.Services;
+using System.Reactive.Linq;
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {
@@ -25,6 +26,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
         private readonly IMessageService _messageService;
         private readonly ICustomAgentContextProvider _contextProvider;
         private readonly IEventAggregator _eventAggregator;
+        private readonly INavigationService _navigationService;
+        private readonly IUserDialogs _userDialogs;
         private static readonly String GENERIC_CONNECTION_REQUEST_FAILURE_MESSAGE = "Failed to accept invite!";
 
         private AgentMessage _invite;
@@ -44,8 +47,16 @@ namespace Osma.Mobile.App.ViewModels.Connections
             _registrationService = registrationService;
             _contextProvider = contextProvider;
             _messageService = messageService;
-            _contextProvider = contextProvider;
             _eventAggregator = eventAggregator;
+            _navigationService = navigationService;
+            _userDialogs = userDialogs;
+            MessagingCenter.Subscribe<PassCodeViewModel, CloudAgentRegistrationMessage>(this, ApplicationEventType.PassCodeAuthorisedCloudAgent.ToString(), async (p, o) => {
+                await RegisterCloudAgentAfterAuth(await _contextProvider.GetContextAsync(), o, true);
+            });
+
+            MessagingCenter.Subscribe<PassCodeViewModel, ConnectionInvitationMessage>(this, ApplicationEventType.PassCodeAuthorised.ToString(), async (p, o) => {
+                await CreateConnectionAfterAuth(await _contextProvider.GetContextAsync(), o, true);
+            });
         }
 
         public override Task InitializeAsync(object navigationData)
@@ -67,58 +78,102 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         private async Task CreateConnection(IAgentContext context, ConnectionInvitationMessage invite)
         {
-            if (await isAuthenticatedAsync())
+            if (await isAuthenticatedAsync(null, invite))
             {
-                var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
-                var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
-                var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-                string responseEndpoint = string.Empty;
-                if (records.Count > 0)
-                {
-                    var record = _registrationService.getRandomCloudAgent(records);
-                    responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
-                    isEndpointUriAbsent = false;
-                }
-                bool newSsoConnection = true;
-                if (invite.Sso)
-                {
-                    var connections = await _connectionService.ListAsync(context);
-                    if (connections.FindAll(con => invite.Label.Equals(con.Alias.Name)).Count != 0)
-                    {
-                        newSsoConnection = false;
-                        var con = connections.Where(conn => invite.Label.Equals(conn.Alias.Name)).First();
-                        var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid + "/" + invite.InvitationKey;
-                        HttpClient httpClient = new HttpClient();
-                        await httpClient.GetAsync(new System.Uri(endpoint));
-                    }
-                }
-                if (newSsoConnection)
-                {
-                    var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
-                    var rsp = await _messageService.SendAsync(context.Wallet, msg, rec, invite.RecipientKeys.First(), isEndpointUriAbsent);
+                await CreateConnectionAfterAuth(context, invite, false);
+            }
+        }
 
-                    if (isEndpointUriAbsent)
-                    {
-                        await _connectionService.ProcessResponseAsync(context, rsp.GetMessage<ConnectionResponseMessage>(), rec);
-                    }
+        private async Task CreateConnectionAfterAuth(IAgentContext context, ConnectionInvitationMessage invite, bool showLoader)
+        {
+            IProgressDialog loading = null;
+            if (showLoader)
+            {
+                loading = DialogService.Loading("Processing");
+            }
+            var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
+            var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
+            var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+            string responseEndpoint = string.Empty;
+            if (records.Count > 0)
+            {
+                var record = _registrationService.getRandomCloudAgent(records);
+                responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
+                isEndpointUriAbsent = false;
+            }
+            bool newSsoConnection = true;
+            if (invite.Sso)
+            {
+                var connections = await _connectionService.ListAsync(context);
+                if (connections.FindAll(con => invite.Label.Equals(con.Alias.Name)).Count != 0)
+                {
+                    newSsoConnection = false;
+                    var con = connections.Where(conn => invite.Label.Equals(conn.Alias.Name)).First();
+                    var endpoint = con.Endpoint.Uri.Replace("response", "trigger/") + con.MyDid + "/" + invite.InvitationKey;
+                    HttpClient httpClient = new HttpClient();
+                    await httpClient.GetAsync(new System.Uri(endpoint));
                 }
+            }
+            if (newSsoConnection)
+            {
+                var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
+                var rsp = await _messageService.SendAsync(context.Wallet, msg, rec, invite.RecipientKeys.First(), isEndpointUriAbsent);
+
+                if (isEndpointUriAbsent)
+                {
+                    await _connectionService.ProcessResponseAsync(context, rsp.GetMessage<ConnectionResponseMessage>(), rec);
+                }
+            }
+            if (showLoader)
+            {
+                loading.Hide();
             }
         }
 
         private async Task RegisterCloudAgent(IAgentContext context, CloudAgentRegistrationMessage registration)
         {
-            if (await isAuthenticatedAsync())
+            if (await isAuthenticatedAsync(registration, null))
             {
-                var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
-                if (records.FindAll(x => x.Label.Equals(registration.Label)).Count != 0)
-                {
-                    throw new AgentFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, $"{registration.Label} already registered!");
-                }
-                await _registrationService.RegisterCloudAgentAsync(context, registration);
+                await RegisterCloudAgentAfterAuth(context, registration, false);
             }
         }
 
-        private async Task<bool> isAuthenticatedAsync()
+
+        private async Task RegisterCloudAgentAfterAuth(IAgentContext context, CloudAgentRegistrationMessage registration, bool showLoader)
+        {
+            IProgressDialog loading = null;
+            if (showLoader)
+            {
+                loading = DialogService.Loading("Processing");
+            }
+            var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
+            bool progress = true;
+            if (records.FindAll(x => x.Label.Equals(registration.Label)).Count != 0)
+            {
+                string error = $"{registration.Label} already registered!";
+                if (!showLoader)
+                {
+                    throw new AgentFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, error);
+                }
+                else
+                {
+                    progress = false;
+                    loading.Hide();
+                    DialogService.Alert(error);
+                }
+            }
+            if (progress)
+            {
+                await _registrationService.RegisterCloudAgentAsync(context, registration);
+                if (showLoader)
+                {
+                    loading.Hide();
+                }
+                DialogService.Alert("Cloud Agent registered successfully!");
+            }
+        }
+
+        private async Task<bool> isAuthenticatedAsync(CloudAgentRegistrationMessage registration, ConnectionInvitationMessage invite)
         {
             var result = await CrossFingerprint.Current.IsAvailableAsync(true);
             bool authenticated = true;
@@ -129,6 +184,20 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 {
                     authenticated = false;
                 }
+            } else
+            {
+                authenticated = false;
+                var vm = new PassCodeViewModel(_userDialogs, _navigationService, _contextProvider, _provisioningService);
+                if (invite == null)
+                {
+                    vm.Event = ApplicationEventType.PassCodeAuthorisedCloudAgent;
+                    vm.Registration = registration;
+                } else
+                {
+                    vm.Event = ApplicationEventType.PassCodeAuthorised;
+                    vm.Invite = invite;
+                }
+                await NavigationService.NavigateToPopupAsync<PassCodeViewModel>(true, vm);
             }
             return authenticated;
         }
@@ -156,14 +225,13 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 } else if (_invite is CloudAgentRegistrationMessage)
                 {
                     await RegisterCloudAgent(context, (CloudAgentRegistrationMessage)_invite);
-                    DialogService.Alert("Cloud Agent registered successfully!");
                 }
             }
             catch (AgentFrameworkException agentFrameworkException)
             {
                 errorMessage = agentFrameworkException.Message;
             }
-            catch (Exception) //TODO more granular error protection
+            catch (Exception ex) //TODO more granular error protection
             {
                 errorMessage = GENERIC_CONNECTION_REQUEST_FAILURE_MESSAGE;
             }

@@ -60,7 +60,8 @@ namespace Osma.Mobile.App.Services
                 WalletCredentials = options.WalletOptions.WalletCredentials,
                 AgentSeed = options.Seed,
                 EndpointUri = options.EndpointUri != null ? new Uri($"{options.EndpointUri}") : null,
-                OwnerName = options.Name //"PALOUSER" + (new Random()).Next(0, 100)
+                OwnerName = options.Name,
+                PassCode = options.PassCode
             }) ;
 
             await _keyValueStoreService.SetDataAsync(AgentOptionsKey, options);

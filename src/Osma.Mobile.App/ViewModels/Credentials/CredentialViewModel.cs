@@ -22,6 +22,9 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         private readonly ICustomAgentContextProvider _agentContextProvider;
         private readonly IMessageService _messageService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IProvisioningService _provisioningService;
+        private readonly INavigationService _navigationService;
+        private readonly IUserDialogs _userDialogs;
 
         public CredentialViewModel(
             IUserDialogs userDialogs,
@@ -30,6 +33,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             ICustomAgentContextProvider agentContextProvider,
             IMessageService messageService,
             IEventAggregator eventAggregator,
+            IProvisioningService provisioningService,
             CredentialRecord credential
         ) : base(
             nameof(CredentialViewModel),
@@ -42,7 +46,9 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             _agentContextProvider = agentContextProvider;
             _messageService = messageService;
             _eventAggregator = eventAggregator;
-
+            _userDialogs = userDialogs;
+            _navigationService = navigationService;
+            _provisioningService = provisioningService;
             CredentialName = (credential.SchemaId.Split(':')[2]).Replace(" schema", "") + " - " + (credential.SchemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
 
@@ -60,6 +66,14 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             }
 
             _isNew = IsCredentialNew(_credential);
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedCredentialAccept.ToString(), async (p) => {
+                await AcceptCredentialOffer();
+            });
+
+            MessagingCenter.Subscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorisedCredentialReject.ToString(), async (p) => {
+                await RejectCredentialOffer();
+            });
         }
         private bool IsCredentialNew(CredentialRecord credential)
         {
@@ -70,46 +84,60 @@ namespace Osma.Mobile.App.ViewModels.Credentials
 
         private async Task AcceptCredentialOffer()
         {
-            if (await isAuthenticatedAsync())
+            if (_credential.State != CredentialState.Offered)
             {
-                if (_credential.State != CredentialState.Offered)
-                {
-                    await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
-                    await NavigationService.PopModalAsync();
-                    return;
-                }
-
-                var context = await _agentContextProvider.GetContextAsync();
-                var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
-                _ = await _messageService.SendAsync(context.Wallet, msg, rec);
-
-                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
-
+                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
                 await NavigationService.PopModalAsync();
+                return;
             }
+
+            var context = await _agentContextProvider.GetContextAsync();
+            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, _credential.Id);
+            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
+            await NavigationService.PopModalAsync();
         }
 
         private async Task RejectCredentialOffer()
         {
-            if (await isAuthenticatedAsync())
+            if (_credential.State != CredentialState.Offered)
             {
-                if (_credential.State != CredentialState.Offered)
-                {
-                    await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
-                    await NavigationService.PopModalAsync();
-                    return;
-                }
-
-                var context = await _agentContextProvider.GetContextAsync();
-                await _credentialService.RejectOfferAsync(context, _credential.Id);
-
-                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
-
+                await DialogService.AlertAsync("Credential state should be " + CredentialState.Offered.ToString());
                 await NavigationService.PopModalAsync();
+                return;
             }
+
+            var context = await _agentContextProvider.GetContextAsync();
+            await _credentialService.RejectOfferAsync(context, _credential.Id);
+
+            _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
+
+            await NavigationService.PopModalAsync();
         }
 
-        private async Task<bool> isAuthenticatedAsync()
+        #region Bindable Command
+
+        public ICommand NavigateBackCommand => new Command(async () => await NavigationService.PopModalAsync());
+
+        public ICommand AcceptCredentialOfferCommand => new Command(async () => {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedCredentialAccept))
+            {
+                await AcceptCredentialOffer();
+            }
+        });
+
+        public ICommand RejectCredentialOfferCommand => new Command(async () => {
+            if (await isAuthenticatedAsync(ApplicationEventType.PassCodeAuthorisedCredentialReject))
+            {
+                await RejectCredentialOffer();
+            }
+        });
+
+        #endregion
+
+        private async Task<bool> isAuthenticatedAsync(ApplicationEventType eventType)
         {
             var result = await CrossFingerprint.Current.IsAvailableAsync(true);
             bool authenticated = true;
@@ -121,18 +149,15 @@ namespace Osma.Mobile.App.ViewModels.Credentials
                     authenticated = false;
                 }
             }
+            else
+            {
+                authenticated = false;
+                var vm = new PassCodeViewModel(_userDialogs, _navigationService, _agentContextProvider, _provisioningService);
+                vm.Event = eventType;
+                await NavigationService.NavigateToPopupAsync<PassCodeViewModel>(true, vm);
+            }
             return authenticated;
         }
-
-        #region Bindable Command
-
-        public ICommand NavigateBackCommand => new Command(async () => await NavigationService.PopModalAsync());
-
-        public ICommand AcceptCredentialOfferCommand => new Command(async () => await AcceptCredentialOffer());
-
-        public ICommand RejectCredentialOfferCommand => new Command(async () => await RejectCredentialOffer());
-
-        #endregion
 
         #region Bindable Properties
 

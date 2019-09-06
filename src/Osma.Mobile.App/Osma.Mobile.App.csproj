@@ -37,6 +37,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="Views\UserRegistration\FullNamePage.xaml" />
+    <EmbeddedResource Remove="Views\Security\PopUp\PassCodePopUpPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\legal.html" />
   </ItemGroup>
   <ItemGroup>
@@ -64,12 +68,6 @@
     <EmbeddedResource Update="Views\UserRegistration\CreateWalletPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\UserRegistration\EmailAddressPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Views\UserRegistration\FullNamePage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Views\UserRegistration\PhoneNumberPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -78,11 +76,15 @@
     <Compile Remove="Views\Controls\Card.xaml.cs" />
     <Compile Remove="Effects\ViewShadowEffect.cs" />
     <Compile Remove="Views\Connections\ConnectionTransactionCell.cs" />
+    <Compile Remove="ViewModels\UserRegistration\FullNameViewModel.cs" />
+    <Compile Remove="Views\UserRegistration\FullNamePage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Credentials\" />
     <Folder Include="ViewModels\Credentials\" />
     <Folder Include="Views\Components\" />
+    <Folder Include="Views\Security\" />
+    <Folder Include="ViewModels\Security\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Osma.Mobile.App.Services\Osma.Mobile.App.Services.csproj" />

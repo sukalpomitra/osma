@@ -22,7 +22,7 @@
                Placeholder="Please enter full name"
                PlaceholderColor="Olive"
                MaxLength="30"/>
-            <Label Text="We also need a pass code:"  IsVisible="{Binding NoBiometric}"/>
+            <Label Text="We also need a 6 digit pass code:"  IsVisible="{Binding NoBiometric}"/>
             <Entry Text="{Binding PassCode}"
                x:Name="passCode"
                IsPassword="True"
