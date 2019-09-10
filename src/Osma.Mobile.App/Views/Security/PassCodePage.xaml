@@ -14,25 +14,57 @@
             EasingOut="SinIn"
             HasBackgroundAnimation="True"/>
     </pages:PopupPage.Animation>
-    <StackLayout BackgroundColor="Black">
-        <Label Text="Please authenticate to proceed :" TextColor="White"/>
-        <Entry Text="{Binding PassCode}"
-               TextColor="White"
-               x:Name="passCode"
-               Placeholder="Please enter pass code"
-               PlaceholderColor="Olive"
-               Keyboard="Numeric"
-               IsPassword="True"
-               MaxLength="6"/>
-        <Button VerticalOptions="CenterAndExpand"
-                TextColor="White"
-                BackgroundColor="Gray"
-                Text="Authorise"
-                Command="{Binding Validate}"/>
-        <Button VerticalOptions="CenterAndExpand"
-                TextColor="White"
-                BackgroundColor="Gray"
-                Text="Cancel"
-                Command="{Binding Cancel}"/>
-    </StackLayout>
+    <Grid
+            Padding="15"
+            RowSpacing="0" BackgroundColor="Black">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="1.8*" />
+                <RowDefinition Height="0.5*" />
+            </Grid.RowDefinitions>
+                <StackLayout
+                Grid.Row="0"
+                Padding="10"
+                VerticalOptions="FillAndExpand">
+                </StackLayout>
+            <StackLayout
+                Grid.Row="1"
+                VerticalOptions="StartAndExpand"
+                Spacing="10"
+                Padding="10">
+                <Label
+                    FontSize="26"
+                    HorizontalTextAlignment="Center"
+                    Text="Please authenticate to proceed :"/>
+                <Entry Text="{Binding PassCode}"
+                   TextColor="White"
+                   x:Name="passCode"
+                   Placeholder="Please enter pass code here"
+                   PlaceholderColor="Olive"
+                   Keyboard="Numeric"
+                   IsPassword="True"
+                   MaxLength="6"/>
+            </StackLayout>
+            <StackLayout
+                Grid.Row="2"
+                Padding="10"
+                Orientation="Horizontal"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+                <Button
+                    Style="{DynamicResource RedButtonStyle}"
+                    Command="{Binding Cancel}"
+                    HorizontalOptions="FillAndExpand"
+                    Text="Cancel"/>
+                <Button
+                    x:Name="authorize"
+                    HorizontalOptions="FillAndExpand"
+                    Style="{DynamicResource BlueButtonStyle}"
+                    Command="{Binding Validate}"
+                    Text="Authorize"/>
+            </StackLayout>
+        </Grid>
+    
+
+    
 </pages:PopupPage>

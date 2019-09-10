@@ -35,7 +35,6 @@ namespace Osma.Mobile.App.ViewModels
             _agentContextProvider = agentContextProvider;
             _provisioningService = provisioningService;
             _passCode = "";
-            //_scope = scope;
         }
 
 
@@ -102,7 +101,7 @@ namespace Osma.Mobile.App.ViewModels
             {
                 DialogService.Alert("Wrong Passcode.");
             }
-        });
+        }, () => false);
 
         public ICommand Cancel => new Command(async () =>
         {
