@@ -41,7 +41,7 @@ namespace Osma.Mobile.App.Views.Components
                     }
                 }
                 catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.Message);
                 }
                 view.webview.Source = source;
             });
