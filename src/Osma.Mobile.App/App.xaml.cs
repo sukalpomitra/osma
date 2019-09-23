@@ -1,8 +1,5 @@
 using System.Threading.Tasks;
 using Autofac;
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Utilities;
 using Osma.Mobile.App.ViewModels;

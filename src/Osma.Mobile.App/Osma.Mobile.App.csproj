@@ -21,8 +21,6 @@
   <ItemGroup>
     <PackageReference Include="Acr.UserDialogs" Version="7.0.4" />
     <PackageReference Include="Autofac" Version="4.9.2" />
-    <PackageReference Include="Microsoft.AppCenter.Analytics" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.1.1" />
     <PackageReference Include="ReactiveUI" Version="10.0.1-preview.6" />
     <PackageReference Include="Rg.Plugins.Popup" Version="1.1.5.188" />
     <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
