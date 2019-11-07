@@ -118,7 +118,6 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 MessageTypes.CloudAgentRegistration : url.Contains("m=") ?
                 MessageTypes.ProofRequest
                 : MessageTypes.ConnectionInvitation;
-
                 try
                 {
                     switch (messageType)
