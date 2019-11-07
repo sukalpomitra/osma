@@ -366,12 +366,19 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             {
                 IList<string> credentialDefinitionIds = restrictions
                     .Select(r => r["cred_def_id"]?.ToString())
+                    .Where(r => r != null)
                     .ToList();
 
-                ProofCredentials = credentialsRecords
-                    .Where(cr => cr.State == CredentialState.Issued && 
-                                 credentialDefinitionIds.Contains(cr.CredentialDefinitionId))
-                    .ToList();
+                if (credentialDefinitionIds.Count > 0)
+                {
+                    ProofCredentials = credentialsRecords
+                        .Where(cr => cr.State == CredentialState.Issued &&
+                                     credentialDefinitionIds.Contains(cr.CredentialDefinitionId))
+                        .ToList();
+                } else
+                {
+                    ProofCredentials = credentialsRecords;
+                }
             }
         }
 

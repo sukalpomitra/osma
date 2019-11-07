@@ -5,6 +5,7 @@ using Acr.UserDialogs;
 using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Messages;
 using AgentFramework.Core.Messages.Connections;
+using AgentFramework.Core.Models.Records;
 using AgentFramework.Core.Models.Wallets;
 using Autofac;
 using Osma.Mobile.App.Events;
@@ -67,6 +68,13 @@ namespace Osma.Mobile.App.ViewModels
             set => this.RaiseAndSetIfChanged(ref _registration, value);
         }
 
+        private CredentialRecord _credential;
+        public CredentialRecord Credential
+        {
+            get => _credential;
+            set => this.RaiseAndSetIfChanged(ref _credential, value);
+        }
+
         #endregion
 
         #region Bindable Command    
@@ -88,11 +96,13 @@ namespace Osma.Mobile.App.ViewModels
                     case ApplicationEventType.PassCodeAuthorisedDeleteConnection:
                     case ApplicationEventType.PassCodeAuthorisedSSO:
                     case ApplicationEventType.PassCodeAuthorisedDeleteCloudAgent:
-                    case ApplicationEventType.PassCodeAuthorisedCredentialAccept:
                     case ApplicationEventType.PassCodeAuthorisedCredentialReject:
                     case ApplicationEventType.PassCodeAuthorisedProofAccept:
                     case ApplicationEventType.PassCodeAuthorisedProofReject:
                         MessagingCenter.Send(this, Event.ToString());
+                        break;
+                    case ApplicationEventType.PassCodeAuthorisedCredentialAccept:
+                        MessagingCenter.Send(this, Event.ToString(), Credential);
                         break;
                     default:
                         break;

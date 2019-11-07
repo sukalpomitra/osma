@@ -50,11 +50,13 @@ namespace Osma.Mobile.App.ViewModels.Connections
             _eventAggregator = eventAggregator;
             _navigationService = navigationService;
             _userDialogs = userDialogs;
-            MessagingCenter.Subscribe<PassCodeViewModel, CloudAgentRegistrationMessage>(this, ApplicationEventType.PassCodeAuthorisedCloudAgent.ToString(), async (p, o) => {
+            MessagingCenter.Subscribe<PassCodeViewModel, CloudAgentRegistrationMessage>(this, ApplicationEventType.PassCodeAuthorisedCloudAgent.ToString(), async (p, o) =>
+            {
                 await RegisterCloudAgentAfterAuth(await _contextProvider.GetContextAsync(), o, true);
             });
 
-            MessagingCenter.Subscribe<PassCodeViewModel, ConnectionInvitationMessage>(this, ApplicationEventType.PassCodeAuthorised.ToString(), async (p, o) => {
+            MessagingCenter.Subscribe<PassCodeViewModel, ConnectionInvitationMessage>(this, ApplicationEventType.PassCodeAuthorised.ToString(), async (p, o) =>
+            {
                 await CreateConnectionAfterAuth(await _contextProvider.GetContextAsync(), o, true);
             });
         }
@@ -86,6 +88,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
         private async Task CreateConnectionAfterAuth(IAgentContext context, ConnectionInvitationMessage invite, bool showLoader)
         {
+            MessagingCenter.Unsubscribe<PassCodeViewModel, ConnectionInvitationMessage>(this, ApplicationEventType.PassCodeAuthorised.ToString());
+            MessagingCenter.Unsubscribe<PassCodeViewModel>(this, ApplicationEventType.PassCodeAuthorised.ToString());
             IProgressDialog loading = null;
             if (showLoader)
             {
