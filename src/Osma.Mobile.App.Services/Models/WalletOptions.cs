@@ -1,4 +1,4 @@
-﻿using AgentFramework.Core.Models.Wallets;
+﻿using Hyperledger.Aries.Storage;
 
 namespace Osma.Mobile.App.Services.Models
 {

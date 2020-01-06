@@ -6,13 +6,13 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Messages.Connections;
-using AgentFramework.Core.Messages.Proofs;
-using AgentFramework.Core.Models.Records;
-using AgentFramework.Core.Utils;
 using Autofac;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Features.CloudRegistrationMessage;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Features.PresentProof;
+using Hyperledger.Aries.Utils;
 using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services;
@@ -116,7 +116,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 AgentMessage invitation;
                 var messageType = url.Contains("c_a_r=") ?
                 MessageTypes.CloudAgentRegistration : url.Contains("m=") ?
-                MessageTypes.ProofRequest
+                MessageTypes.PresentProofNames.RequestPresentation
                 : MessageTypes.ConnectionInvitation;
                 try
                 {
@@ -128,14 +128,14 @@ namespace Osma.Mobile.App.ViewModels.Connections
                         case MessageTypes.ConnectionInvitation:
                             invitation = MessageUtils.DecodeMessageFromUrlFormat<ConnectionInvitationMessage>(url);
                             break;
-                        case MessageTypes.ProofRequest:
-                            invitation = MessageUtils.DecodeMessageFromUrlFormat<ProofRequestMessage>(url);
-                            ProofRequestMessage proofRequest = (ProofRequestMessage)invitation;
+                        case MessageTypes.PresentProofNames.RequestPresentation:
+                            invitation = MessageUtils.DecodeMessageFromUrlFormat<RequestPresentationMessage>(url);
+                            RequestPresentationMessage proofRequest = (RequestPresentationMessage)invitation;
                             var connection = new ConnectionRecord {
-                                TheirVk = proofRequest.ServiceDecorator.RecipientKeys[0],
+                                TheirVk = proofRequest.ServiceDecorator.RecipientKeys.ToList()[0],
                                 Sso = false
                             };
-                            _proofService.ProcessProofRequestAsync(context, proofRequest, connection, true);
+                            _proofService.ProcessRequestAsync(context, proofRequest, connection, true);
                             break;
                         default:
                             invitation = null;
@@ -156,7 +156,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 Device.BeginInvokeOnMainThread(async () =>
                 {
                     await NavigationService.PopModalAsync();
-                    if (messageType != MessageTypes.ProofRequest)
+                    if (messageType != MessageTypes.PresentProofNames.RequestPresentation)
                     {
                         await NavigationService.NavigateToAsync<AcceptInviteViewModel>(invitation, NavigationType.Modal);
                     }

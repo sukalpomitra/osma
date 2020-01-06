@@ -1,13 +1,18 @@
 ﻿using System.Net.Http;
-using AgentFramework.AspNetCore;
-using AgentFramework.Core.Contracts;
 using AgentFramework.Core.Handlers.Agents;
-using AgentFramework.Core.Handlers.Internal;
-using AgentFramework.Core.Runtime.Transport;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Autofac;
-using AgentFramework.Core.Handlers;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Features.IssueCredential;
+using Hyperledger.Aries.Features.PresentProof;
+using Hyperledger.Aries.Features.TrustPing;
+using Hyperledger.Aries.Runtime;
+using Hyperledger.Aries.Storage;
+using Hyperledger.Aries.Ledger;
+using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Features.Discovery;
 
 namespace Osma.Mobile.App.Services
 {

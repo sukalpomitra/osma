@@ -1,14 +1,13 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
-using AgentFramework.Core.Models;
-using AgentFramework.Core.Models.Records;
 using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
 using Plugin.Fingerprint;
+using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Contracts;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {

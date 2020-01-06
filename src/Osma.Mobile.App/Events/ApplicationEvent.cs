@@ -1,4 +1,4 @@
-﻿using AgentFramework.Core.Messages.Connections;
+﻿using Hyperledger.Aries.Features.DidExchange;
 
 namespace Osma.Mobile.App.Events
 {

@@ -3,18 +3,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Messages.Connections;
-using AgentFramework.Core.Exceptions;
 using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
 using System.Net.Http;
 using Plugin.Fingerprint;
-using Osma.Mobile.App.Services;
 using System.Reactive.Linq;
+using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Features.CloudRegistrationMessage;
+using Hyperledger.Aries;
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {
@@ -96,14 +97,12 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 loading = DialogService.Loading("Processing");
             }
             var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
-            var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
             var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
             string responseEndpoint = string.Empty;
             if (records.Count > 0)
             {
                 var record = _registrationService.getRandomCloudAgent(records);
                 responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
-                isEndpointUriAbsent = false;
             }
             bool newSsoConnection = true;
             if (invite.Sso)
@@ -121,12 +120,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
             if (newSsoConnection)
             {
                 var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
-                var rsp = await _messageService.SendAsync(context.Wallet, msg, rec, invite.RecipientKeys.First(), isEndpointUriAbsent);
-
-                if (isEndpointUriAbsent)
-                {
-                    await _connectionService.ProcessResponseAsync(context, rsp.GetMessage<ConnectionResponseMessage>(), rec);
-                }
+                await _messageService.SendAsync(context.Wallet, msg, invite.RecipientKeys.First(), responseEndpoint);
             }
             if (showLoader)
             {
@@ -157,7 +151,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 string error = $"{registration.Label} already registered!";
                 if (!showLoader)
                 {
-                    throw new AgentFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, error);
+                    throw new AriesFrameworkException(ErrorCode.CloudAgentAlreadyRegistered, error);
                 }
                 else
                 {
@@ -231,9 +225,9 @@ namespace Osma.Mobile.App.ViewModels.Connections
                     await RegisterCloudAgent(context, (CloudAgentRegistrationMessage)_invite);
                 }
             }
-            catch (AgentFrameworkException agentFrameworkException)
+            catch (AriesFrameworkException ariesFrameworkException)
             {
-                errorMessage = agentFrameworkException.Message;
+                errorMessage = ariesFrameworkException.Message;
             }
             catch (Exception ex) //TODO more granular error protection
             {

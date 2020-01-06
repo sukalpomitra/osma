@@ -6,18 +6,19 @@ using Osma.Mobile.App.Services.Interfaces;
 using Xamarin.Forms;
 using ReactiveUI;
 using System.Threading.Tasks;
-using AgentFramework.Core.Contracts;
 using Autofac;
 using ZXing.Net.Mobile.Forms;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Utils;
-using AgentFramework.Core.Messages.Connections;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.ViewModels.Connections;
 using Osma.Mobile.App.Extensions;
 using System.Linq;
 using Osma.Mobile.App.Events;
 using System.Reactive.Linq;
+using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Utils;
+using Hyperledger.Aries.Features.CloudRegistrationMessage;
+using Hyperledger.Aries.Features.DidExchange;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {

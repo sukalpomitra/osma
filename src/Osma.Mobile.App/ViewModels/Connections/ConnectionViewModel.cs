@@ -5,11 +5,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Messages.Common;
-using AgentFramework.Core.Messages.Discovery;
-using AgentFramework.Core.Models.Records;
 using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Extensions;
 using Osma.Mobile.App.Services.Interfaces;
@@ -17,6 +12,11 @@ using Osma.Mobile.App.Views.Connections;
 using ReactiveUI;
 using Xamarin.Forms;
 using Plugin.Fingerprint;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Features.Discovery;
+using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Configuration;
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {

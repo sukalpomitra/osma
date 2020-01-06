@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
-using AgentFramework.Core.Messages;
-using AgentFramework.Core.Messages.Connections;
-using AgentFramework.Core.Models.Records;
-using AgentFramework.Core.Models.Wallets;
 using Autofac;
+using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Features.CloudRegistrationMessage;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Features.IssueCredential;
 using Osma.Mobile.App.Events;
 using Osma.Mobile.App.Services.Interfaces;
-using Osma.Mobile.App.Services.Models;
-using Osma.Mobile.App.Views.UserRegistration;
 using ReactiveUI;
 using Xamarin.Forms;
 

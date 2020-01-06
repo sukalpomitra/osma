@@ -3,11 +3,11 @@ using System.Windows.Input;
 using Acr.UserDialogs;
 using Osma.Mobile.App.Services;
 using Osma.Mobile.App.Services.Interfaces;
-using AgentFramework.Core.Contracts;
 using ReactiveUI;
 using Xamarin.Forms;
 using Xamarin.Essentials;
 using Osma.Mobile.App.Views.Legal;
+using Hyperledger.Aries.Configuration;
 
 namespace Osma.Mobile.App.ViewModels.Account
 {
