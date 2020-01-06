@@ -25,8 +25,4 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core\AgentFramework.Core.csproj" />
-    <ProjectReference Include="..\..\..\agent-framework\src\AgentFramework.Core.Handlers\AgentFramework.Core.Handlers.csproj" />
-  </ItemGroup>
 </Project>
