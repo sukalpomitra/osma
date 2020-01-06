@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Osma.Mobile.App.Services\Osma.Mobile.App.Services.csproj" />
+    <ProjectReference Include="..\..\..\aries-framework-dotnet\src\Hyperledger.Aries\Hyperledger.Aries.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Views\CloudAgents\CloudAgentPage.xaml.cs">
