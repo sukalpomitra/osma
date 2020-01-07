@@ -97,6 +97,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 loading = DialogService.Loading("Processing");
             }
             var provisioningRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
+            var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
             var records = await _registrationService.GetAllCloudAgentAsync(context.Wallet);
             string responseEndpoint = string.Empty;
             if (records.Count > 0)
@@ -120,7 +121,14 @@ namespace Osma.Mobile.App.ViewModels.Connections
             if (newSsoConnection)
             {
                 var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
-                await _messageService.SendAsync(context.Wallet, msg, invite.RecipientKeys.First(), responseEndpoint);
+                if (!isEndpointUriAbsent)
+                {
+                    await _messageService.SendAsync(context.Wallet, msg, invite.RecipientKeys.First(), rec.Endpoint.Uri);
+                } else
+                {
+                    var rsp = await _messageService.SendReceiveAsync<ConnectionResponseMessage>(context.Wallet, msg, rec);
+                    await _connectionService.ProcessResponseAsync(context, rsp, rec);
+                }
             }
             if (showLoader)
             {

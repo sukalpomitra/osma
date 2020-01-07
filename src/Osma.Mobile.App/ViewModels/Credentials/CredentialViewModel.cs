@@ -6,11 +6,13 @@ using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
-using AgentFramework.Core.Models.Records;
-using AgentFramework.Core.Contracts;
 using System.Threading.Tasks;
 using Osma.Mobile.App.Events;
 using Plugin.Fingerprint;
+using Hyperledger.Aries.Features.IssueCredential;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Contracts;
 
 namespace Osma.Mobile.App.ViewModels.Credentials
 {
@@ -96,8 +98,8 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             }
 
             var context = await _agentContextProvider.GetContextAsync();
-            var (msg, rec) = await _credentialService.CreateCredentialRequestAsync(context, credentialRecord.Id);
-            _ = await _messageService.SendAsync(context.Wallet, msg, rec);
+            var (msg, rec) = await _credentialService.CreateRequestAsync(context, credentialRecord.Id);
+            await _messageService.SendAsync(context.Wallet, msg, rec.TheirVk, rec.Endpoint.Uri);
 
             _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
 

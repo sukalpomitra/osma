@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Contracts;
+using Hyperledger.Aries.Extensions;
+using Hyperledger.Aries.Features.DidExchange;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
-using AgentFramework.Core.Extensions;
 
 namespace Osma.Mobile.App.ViewModels.CreateInvitation
 {

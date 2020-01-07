@@ -13,6 +13,7 @@ using Hyperledger.Aries.Storage;
 using Hyperledger.Aries.Ledger;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Features.Discovery;
+using Hyperledger.Aries.Payments;
 
 namespace Osma.Mobile.App.Services
 {
@@ -127,6 +128,18 @@ namespace Osma.Mobile.App.Services
             builder.RegisterType<DefaultDiscoveryService>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
+
+            builder.RegisterType<DefaultPaymentService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder.RegisterType<DefaultLedgerSigningService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            //builder.RegisterType<DefaultHttpClientFactory>()
+            //    .AsImplementedInterfaces()
+            //    .SingleInstance();
         }
     }
 }

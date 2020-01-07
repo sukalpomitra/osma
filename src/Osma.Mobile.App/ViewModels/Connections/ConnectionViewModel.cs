@@ -17,6 +17,7 @@ using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Features.Discovery;
 using Hyperledger.Aries.Contracts;
 using Hyperledger.Aries.Configuration;
+using Hyperledger.Aries.Features.TrustPing;
 
 namespace Osma.Mobile.App.ViewModels.Connections
 {
@@ -88,8 +89,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
 
             try
             {
-                var response = await _messageService.SendAsync(context.Wallet, message, _record, null, true);
-                protocols = response.GetMessage<DiscoveryDiscloseMessage>();
+                protocols = await _messageService.SendReceiveAsync<DiscoveryDiscloseMessage>(context.Wallet, message, _record);
+                //protocols = response.GetMessage<DiscoveryDiscloseMessage>();
             }
             catch (Exception)
             {
@@ -146,8 +147,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
             bool success = false;
             try
             {
-                var response = await _messageService.SendAsync(context.Wallet, message, _record, null, true);
-                var trustPingResponse = response.GetMessage<TrustPingResponseMessage>();
+                var trustPingResponse = await _messageService.SendReceiveAsync<TrustPingResponseMessage>(context.Wallet, message, _record);
+                //var trustPingResponse = response.GetMessage<TrustPingResponseMessage>();
                 success = true;
             }
             catch (Exception)

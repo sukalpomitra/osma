@@ -6,16 +6,19 @@ using Acr.UserDialogs;
 using Osma.Mobile.App.Services.Interfaces;
 using ReactiveUI;
 using Xamarin.Forms;
-using AgentFramework.Core.Models.Records;
-using AgentFramework.Core.Contracts;
 using System.Threading.Tasks;
 using Osma.Mobile.App.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using AgentFramework.Core.Models.Proofs;
 using Xamarin.Forms.Internals;
 using System.Reactive.Linq;
 using Plugin.Fingerprint;
+using Hyperledger.Aries.Features.PresentProof;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Features.IssueCredential;
+using Hyperledger.Aries.Features.DidExchange;
+using Hyperledger.Aries.Configuration;
 
 namespace Osma.Mobile.App.ViewModels.ProofRequests
 {
@@ -156,11 +159,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         
         private async Task AcceptProofRequest()
         {
-            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            if (_proof.State != Hyperledger.Aries.Features.PresentProof.ProofState.Requested)
             {
                 await DialogService
                     .AlertAsync("Proof state should be " +
-                                AgentFramework.Core.Models.Records.ProofState.Requested);
+                                Hyperledger.Aries.Features.PresentProof.ProofState.Requested);
                 return;
             }
 
@@ -181,7 +184,7 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             };
 
             var context = await _agentContextProvider.GetContextAsync();
-            var (msg, rec) = await _proofService.CreateProofAsync(context, _proof.Id, requestedCredentials);
+            var (msg, rec) = await _proofService.CreatePresentationAsync(context, _proof.Id, requestedCredentials);
             await _messageService.SendAsync(context.Wallet, msg, rec);
 
             _eventAggregator.Publish(new ApplicationEvent { Type = ApplicationEventType.ProofRequestUpdated });
@@ -191,11 +194,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task LoadProofCredentials(ProofAttribute proofAttribute)
         {
-            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            if (_proof.State != Hyperledger.Aries.Features.PresentProof.ProofState.Requested)
             {
                 await DialogService
-                    .AlertAsync("Proof state should be " + 
-                                AgentFramework.Core.Models.Records.ProofState.Requested);
+                    .AlertAsync("Proof state should be " +
+                                Hyperledger.Aries.Features.PresentProof.ProofState.Requested);
                 return;
             }
             if (_previousProofAttribute.Any() && !_previousProofAttribute.ContainsKey(proofAttribute.Name))
@@ -226,11 +229,11 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
 
         private async Task BuildRevealedAttributeMap(ProofAttribute proofAttribute)
         {
-            if (_proof.State != AgentFramework.Core.Models.Records.ProofState.Requested)
+            if (_proof.State != Hyperledger.Aries.Features.PresentProof.ProofState.Requested)
             {
                 await DialogService
-                    .AlertAsync("Proof state should be " + 
-                                AgentFramework.Core.Models.Records.ProofState.Requested);
+                    .AlertAsync("Proof state should be " +
+                                Hyperledger.Aries.Features.PresentProof.ProofState.Requested);
                 return;
             }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using AgentFramework.Core.Models.Wallets;
 using Osma.Mobile.App.Services.Interfaces;
 using Osma.Mobile.App.Services.Models;
 using Osma.Mobile.App.Views.UserRegistration;

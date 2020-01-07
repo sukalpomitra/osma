@@ -1,13 +1,12 @@
 ﻿using System.Threading.Tasks;
-using AgentFramework.Core.Contracts;
+using Hyperledger.Aries.Configuration;
 using Osma.Mobile.App.Services.Interfaces;
-using Osma.Mobile.App.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace Osma.Mobile.App.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
+    [XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MainPage : TabbedPage, IRootView
 	{
         private readonly ICustomAgentContextProvider _agentContextProvider;
