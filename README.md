@@ -30,10 +30,6 @@ This mobile apps primary dependency is upon the open source project [Aries Frame
 
 Much of the emerging standards Osma and Aries Framework implement are born out of the [Aries](https://github.com/hyperledger/aries-rfcs) community.
 
-### Indy
-
-Much of the emerging standards Osma and AgentFramework implement are born out of the [Indy-Agent]() community.
-
 ## Getting started
 1. Clone it locally,
 2. Run `git lfs pull` in order to pull the dependent native libraries with LFS. If you do not have this installed please refer to [here](docs/development.md)  
