@@ -22,9 +22,13 @@ There are several key standards in the SSI space but arguably the most important
 
 ## Project Affiliation
 
-### AgentFramework
+### Aries Framework Dotnet
 
-This mobile apps primary dependency is upon the open source project [AgentFramework](https://github.com/streetcred-id/agent-framework). This framework provides the baseline components for realising agents, Osma extends this framework in the context of a mobile app to realise a mobile agent.
+This mobile apps primary dependency is upon the open source project [Aries Framework Dotnet](https://github.com/hyperledger/aries-framework-dotnet). This framework provides the baseline components for realising agents, Osma extends this framework in the context of a mobile app to realise a mobile agent.
+
+### Aries
+
+Much of the emerging standards Osma and Aries Framework implement are born out of the [Aries](https://github.com/hyperledger/aries-rfcs) community.
 
 ### Indy
 
