@@ -14,6 +14,8 @@ using Hyperledger.Aries.Ledger;
 using Hyperledger.Aries.Configuration;
 using Hyperledger.Aries.Features.Discovery;
 using Hyperledger.Aries.Payments;
+using Microsoft.Extensions.Options;
+using Osma.Mobile.App.Services.Interfaces;
 
 namespace Osma.Mobile.App.Services
 {
@@ -24,6 +26,12 @@ namespace Osma.Mobile.App.Services
             base.Load(builder);
 
             builder.Populate(new ServiceCollection());
+
+            builder.Register(container =>
+            {
+                var service = container.Resolve<IKeyValueStoreService>();
+                return Options.Create(service.GetData<AgentOptions>("AgentOptions"));
+            });
 
             builder
                 .RegisterType<DefaultConnectionHandler>()
@@ -137,9 +145,9 @@ namespace Osma.Mobile.App.Services
                 .AsImplementedInterfaces()
                 .SingleInstance();
 
-            //builder.RegisterType<DefaultHttpClientFactory>()
-            //    .AsImplementedInterfaces()
-            //    .SingleInstance();
+            builder.RegisterType<DefaultHttpClientFactory>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
         }
     }
 }

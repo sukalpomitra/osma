@@ -9,7 +9,6 @@ using ReactiveUI;
 using Xamarin.Forms;
 using Plugin.Fingerprint;
 using Hyperledger.Aries.Storage;
-using AgentOptions = Hyperledger.Aries.Configuration.AgentOptions;
 
 namespace Osma.Mobile.App.ViewModels
 {
@@ -83,12 +82,18 @@ namespace Osma.Mobile.App.ViewModels
                 //suppling ownership info to the agent etc..
                 var options = new AgentOptions
                 {
-                    GenesisFilename = genesisFilePath,
-                    PoolName = "EdgeAgentPoolConnection",
-                    ProtocolVersion = 2,
-                    WalletConfiguration = new WalletConfiguration { Id = Guid.NewGuid().ToString() },
-                    WalletCredentials = new WalletCredentials { Key = "LocalWalletKey" },
-                    AgentName = FullName,
+                    PoolOptions = new PoolOptions
+                    {
+                        GenesisFilename = "pool_genesis.txn",
+                        PoolName = "EdgeAgentPoolConnection",
+                        ProtocolVersion = 2
+                    },
+                    WalletOptions = new WalletOptions
+                    {
+                        WalletConfiguration = new WalletConfiguration { Id = Guid.NewGuid().ToString() },
+                        WalletCredentials = new WalletCredentials { Key = "LocalWalletKey" }
+                    },
+                    Name = FullName,
                     PassCode = PassCode
                 };
 

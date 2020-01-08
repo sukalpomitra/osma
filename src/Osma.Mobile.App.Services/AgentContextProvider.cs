@@ -7,7 +7,6 @@ using Hyperledger.Aries.Ledger;
 using Hyperledger.Aries.Storage;
 using Hyperledger.Indy.WalletApi;
 using Osma.Mobile.App.Services.Interfaces;
-using AgentOptions = Hyperledger.Aries.Configuration.AgentOptions;
 
 namespace Osma.Mobile.App.Services
 {
@@ -21,7 +20,7 @@ namespace Osma.Mobile.App.Services
 
         private const string AgentOptionsKey = "AgentOptions";
 
-        private AgentOptions _options;
+        private Models.AgentOptions _options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Osma.Mobile.App.Services.AgentContextProvider" /> class.
@@ -43,29 +42,29 @@ namespace Osma.Mobile.App.Services
             _agent = agent;
 
             if (_keyValueStoreService.KeyExists(AgentOptionsKey))
-                _options = _keyValueStoreService.GetData<AgentOptions>(AgentOptionsKey);
+                _options = _keyValueStoreService.GetData<Models.AgentOptions>(AgentOptionsKey);
         }
 
-        public async Task<bool> CreateAgentAsync(AgentOptions options)
+        public async Task<bool> CreateAgentAsync(Models.AgentOptions options)
         {
 #if __ANDROID__
             WalletConfiguration.WalletStorageConfiguration _storage = new WalletConfiguration.WalletStorageConfiguration { Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".indy_client") };
-            options.WalletConfiguration.StorageConfiguration = _storage;
+            options.WalletOptions.WalletConfiguration.StorageConfiguration = _storage;
 #endif
-            await _provisioningService.ProvisionAgentAsync(new AgentOptions
+            await _provisioningService.ProvisionAgentAsync(new Hyperledger.Aries.Configuration.AgentOptions
             {
-                WalletConfiguration = options.WalletConfiguration,
-                WalletCredentials = options.WalletCredentials,
-                AgentKeySeed = options.AgentKeySeed,
+                WalletConfiguration = options.WalletOptions.WalletConfiguration,
+                WalletCredentials = options.WalletOptions.WalletCredentials,
+                AgentKeySeed = options.Seed,
                 EndpointUri = options.EndpointUri != null ? new Uri($"{options.EndpointUri}") : null,
-                AgentName = options.AgentName,
+                AgentName = options.Name,
                 PassCode = options.PassCode
             }) ;
 
             await _keyValueStoreService.SetDataAsync(AgentOptionsKey, options);
             _options = options;
 
-            await _poolService.CreatePoolAsync(_options.PoolName, _options.GenesisFilename);
+            await _poolService.CreatePoolAsync(_options.PoolOptions.PoolName, _options.PoolOptions.GenesisFilename);
 
             return true;
         }
@@ -79,7 +78,7 @@ namespace Osma.Mobile.App.Services
             Wallet wallet;
             try
             {
-                wallet = await _walletService.GetWalletAsync(_options.WalletConfiguration, _options.WalletCredentials);
+                wallet = await _walletService.GetWalletAsync(_options.WalletOptions.WalletConfiguration, _options.WalletOptions.WalletCredentials);
             }
             catch (Exception e)
             {
@@ -89,10 +88,10 @@ namespace Osma.Mobile.App.Services
 
             return new AgentContext
             {
-                Did = _options.AgentDid,
+                Did = _options.Did,
                 Wallet = wallet,
                 Pool = new PoolAwaitable(() => _poolService.GetPoolAsync(
-                    _options.PoolName, _options.ProtocolVersion))
+                    _options.PoolOptions.PoolName, _options.PoolOptions.ProtocolVersion))
             };
         }
 
