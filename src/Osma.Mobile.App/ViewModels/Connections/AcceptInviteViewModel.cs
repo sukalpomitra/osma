@@ -104,6 +104,7 @@ namespace Osma.Mobile.App.ViewModels.Connections
             {
                 var record = _registrationService.getRandomCloudAgent(records);
                 responseEndpoint = record.Endpoint.ResponseEndpoint + "/" + record.MyConsumerId;
+                isEndpointUriAbsent = false;
             }
             bool newSsoConnection = true;
             if (invite.Sso)

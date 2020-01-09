@@ -84,7 +84,7 @@ namespace Osma.Mobile.App.ViewModels
                 {
                     PoolOptions = new PoolOptions
                     {
-                        GenesisFilename = "pool_genesis.txn",
+                        GenesisFilename = genesisFilePath,
                         PoolName = "EdgeAgentPoolConnection",
                         ProtocolVersion = 2
                     },
