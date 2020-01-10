@@ -19,6 +19,7 @@ using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Utils;
 using Hyperledger.Aries.Features.CloudRegistrationMessage;
 using Hyperledger.Aries.Features.DidExchange;
+using System.Collections;
 
 namespace Osma.Mobile.App.ViewModels.CloudAgents
 {
@@ -30,6 +31,8 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
         private readonly ILifetimeScope _scope;
         private readonly IMessageService _messageService;
         private bool isRefreshStarted = false;
+
+        private static Queue queue = new Queue();
 
         public CloudAgentsViewModel(IUserDialogs userDialogs, 
                                  INavigationService navigationService,
@@ -63,10 +66,16 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
 
         public async Task BackgroundRefreshCloudAgents()
         {
+            var context = await _agentContextProvider.GetContextAsync();
+            var agent = await _agentContextProvider.GetAgentAsync();
             isRefreshStarted = true;
             for (long i = 0; i <= long.MaxValue; i++)
             {
                 await Task.Delay(5000);
+                while (queue.Count > 0)
+                {
+                    await agent.ProcessAsync(context, (MessageContext)queue.Dequeue());
+                }
                 await RefreshCloudAgents();
             }
         }
@@ -93,7 +102,7 @@ namespace Osma.Mobile.App.ViewModels.CloudAgents
                     var messages = await _messageService.ConsumeAsync(context.Wallet);
                     foreach (var message in messages)
                     {
-                        await agent.ProcessAsync(context, message);
+                        queue.Enqueue(message);
                     }
                 }
                 catch (Exception e)
