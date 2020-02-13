@@ -124,7 +124,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 var (msg, rec) = await _connectionService.CreateRequestAsync(context, invite, responseEndpoint);
                 if (!isEndpointUriAbsent)
                 {
-                    await _messageService.SendAsync(context.Wallet, msg, invite.RecipientKeys.First(), rec.Endpoint.Uri);
+                    await _messageService.SendAsync(context.Wallet, msg, invite.RecipientKeys.First(), rec.Endpoint.Uri,
+                        invite.RoutingKeys != null ? invite.RoutingKeys.ToArray() : null);
                 } else
                 {
                     var rsp = await _messageService.SendReceiveAsync<ConnectionResponseMessage>(context.Wallet, msg, rec);

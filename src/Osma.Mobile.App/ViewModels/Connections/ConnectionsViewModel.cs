@@ -114,8 +114,8 @@ namespace Osma.Mobile.App.ViewModels.Connections
                 }
 
                 AgentMessage invitation;
-                var messageType = url.Contains("c_a_r=") ?
-                MessageTypes.CloudAgentRegistration : url.Contains("m=") ?
+                var messageType = url.Contains("?c_a_r=") ?
+                MessageTypes.CloudAgentRegistration : url.Contains("?m=") ?
                 MessageTypes.PresentProofNames.RequestPresentation
                 : MessageTypes.ConnectionInvitation;
                 try
