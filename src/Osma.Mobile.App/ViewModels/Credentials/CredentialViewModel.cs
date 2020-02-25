@@ -101,7 +101,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             var (msg, rec) = await _credentialService.CreateRequestAsync(context, credentialRecord.Id);
 
             await _messageService.SendAsync(context.Wallet, msg, rec.TheirVk ?? rec.GetTag("InvitationKey") ?? throw new InvalidOperationException("Cannot locate a recipient key"), rec.Endpoint.Uri,
-                rec.Endpoint?.Verkey == null ? null : new[] { rec.Endpoint.Verkey }, rec.MyVk);
+                rec.Endpoint?.Verkey == null ? null : rec.Endpoint.Verkey, rec.MyVk);
 
             _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialUpdated });
 
