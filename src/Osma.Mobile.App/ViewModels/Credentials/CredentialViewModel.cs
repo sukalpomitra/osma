@@ -54,7 +54,7 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             CredentialName = (credential.SchemaId.Split(':')[2]).Replace(" schema", "") + " - " + (credential.SchemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
 
-            if (credential.State == CredentialState.Issued)
+            if (credential.State == CredentialState.Issued && credential.CredentialAttributesValues != null)
             {
                 Attributes = credential.CredentialAttributesValues
                     .Select(p => 
