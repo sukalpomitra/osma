@@ -87,6 +87,14 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
             ProofVersion = "Version - " + requestJson["version"];
             ProofState = _proof.State.ToString();
 
+            if (_proof.State == Hyperledger.Aries.Features.PresentProof.ProofState.Requested)
+            {
+                AreButtonsVisible = true;
+            } else
+            {
+                AreButtonsVisible = false;
+            }
+
             _requestedAttributes = (JObject)requestJson["requested_attributes"];
             _requestedPredicates = (JObject)requestJson["requested_predicates"];
 
@@ -480,6 +488,13 @@ namespace Osma.Mobile.App.ViewModels.ProofRequests
         {
             get => _isFrameVisible;
             set => this.RaiseAndSetIfChanged(ref _isFrameVisible, value);
+        }
+
+        private bool _areButtonsVisible;
+        public bool AreButtonsVisible
+        {
+            get => _areButtonsVisible;
+            set => this.RaiseAndSetIfChanged(ref _areButtonsVisible, value);
         }
 
         private bool _isRevealed;

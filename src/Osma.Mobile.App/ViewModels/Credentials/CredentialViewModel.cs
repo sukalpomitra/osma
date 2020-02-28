@@ -54,17 +54,27 @@ namespace Osma.Mobile.App.ViewModels.Credentials
             CredentialName = (credential.SchemaId.Split(':')[2]).Replace(" schema", "") + " - " + (credential.SchemaId.Split(':')[3]);
             CredentialSubtitle = credential.State.ToString();
 
-            if (credential.State == CredentialState.Issued && credential.CredentialAttributesValues != null)
+            if (credential.State == CredentialState.Issued)
             {
-                Attributes = credential.CredentialAttributesValues
-                    .Select(p => 
-                        new CredentialAttribute()
-                        {
-                            Name = p.Name,
-                            Value = p.Value?.ToString(),
-                            Type = "Text"
-                        })
-                    .ToList();
+                AreButtonsVisible = false;
+                if (credential.CredentialAttributesValues != null)
+                {
+                    Attributes = credential.CredentialAttributesValues
+                        .Select(p =>
+                            new CredentialAttribute()
+                            {
+                                Name = p.Name,
+                                Value = p.Value?.ToString(),
+                                Type = "Text"
+                            })
+                        .ToList();
+                }
+            } else if (credential.State == CredentialState.Offered)
+            {
+                AreButtonsVisible = true;
+            } else
+            {
+                AreButtonsVisible = false;
             }
 
             _isNew = IsCredentialNew(_credential);
@@ -196,6 +206,13 @@ namespace Osma.Mobile.App.ViewModels.Credentials
         {
             get => _credentialSubtitle;
             set => this.RaiseAndSetIfChanged(ref _credentialSubtitle, value);
+        }
+
+        private bool _areButtonsVisible;
+        public bool AreButtonsVisible
+        {
+            get => _areButtonsVisible;
+            set => this.RaiseAndSetIfChanged(ref _areButtonsVisible, value);
         }
 
         private bool _isNew;

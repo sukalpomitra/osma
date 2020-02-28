@@ -202,39 +202,8 @@
                         FontAttributes="Bold"
                         HorizontalTextAlignment="Center"
                     />
-                    <ImageButton
-                        VerticalOptions="Start"
-                        Grid.Row="0"
-                        Grid.Column="2"
-                        Source="more_icon.png"
-                        Style="{StaticResource IconButtonStyle}"
-                        Clicked="ToggleModalTapped"
-                    />
                 </Grid>
             </StackLayout>
-            <Frame
-                HasShadow="false"
-                BackgroundColor="Transparent"
-                x:Name="moreModal"
-                IsVisible="false">
-                <Frame
-                    HasShadow="true"
-                    HorizontalOptions="End"
-                    VerticalOptions="Start">
-                    <StackLayout>
-                        <Button
-                            HorizontalOptions="FillAndExpand"
-                            Text="Accept Proof Request"
-                            Command="{Binding AcceptProofRequestCommand}"
-                            Style="{StaticResource ButtonStyleAccept}"/>
-                        <Button
-                            HorizontalOptions="FillAndExpand"
-                            Text="Reject Proof Request"
-                            Command="{Binding RejectProofRequestCommand}"
-                            Style="{StaticResource ButtonStyleDestructive}"/>
-                    </StackLayout>
-                </Frame>
-            </Frame>
             <StackLayout>
                 <Grid Padding="16">
                     <Grid.ColumnDefinitions>
@@ -344,6 +313,19 @@
                         </StackLayout>
                     </Frame>
                 </Frame>
+                <StackLayout
+                    IsVisible="{Binding AreButtonsVisible}">
+                    <Button
+                        HorizontalOptions="FillAndExpand"
+                        Text="Accept Proof Request"
+                        Command="{Binding AcceptProofRequestCommand}"
+                        Style="{StaticResource ButtonStyleAccept}"/>
+                    <Button
+                        HorizontalOptions="FillAndExpand"
+                        Text="Reject Proof Request"
+                        Command="{Binding RejectProofRequestCommand}"
+                        Style="{StaticResource ButtonStyleDestructive}"/>
+                </StackLayout>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>
